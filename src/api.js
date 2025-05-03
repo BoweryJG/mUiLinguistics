@@ -219,6 +219,230 @@ export async function uploadFile(file, filePath, progressCallback = null) {
   }
 }
 
+/**
+ * Create a new conversation record in Supabase
+ * @param {Object} conversationData - The conversation data
+ * @returns {Promise<Object>} - The Supabase response
+ */
+export async function createConversation(conversationData) {
+  if (!supabase) {
+    console.error('Supabase not configured. Cannot create conversation.');
+    return { error: { message: 'Supabase not configured' } };
+  }
+  
+  try {
+    const { data, error } = await supabase
+      .from('repspheres_conversations')
+      .insert([conversationData])
+      .select();
+      
+    if (error) {
+      console.error('Error creating conversation:', error);
+      return { error };
+    }
+    
+    return { data };
+  } catch (err) {
+    console.error('Exception creating conversation:', err);
+    return { error: err };
+  }
+}
+
+/**
+ * Update a conversation's status
+ * @param {string} conversationId - The conversation ID
+ * @param {string} status - The new status
+ * @param {string} errorMessage - Optional error message if status is 'error'
+ * @returns {Promise<Object>} - The Supabase response
+ */
+export async function updateConversationStatus(conversationId, status, errorMessage = null) {
+  if (!supabase) {
+    console.error('Supabase not configured. Cannot update conversation status.');
+    return { error: { message: 'Supabase not configured' } };
+  }
+  
+  try {
+    const updateData = { status, updated_at: new Date().toISOString() };
+    if (errorMessage) {
+      updateData.error_message = errorMessage;
+    }
+    
+    const { data, error } = await supabase
+      .from('repspheres_conversations')
+      .update(updateData)
+      .eq('id', conversationId)
+      .select();
+      
+    if (error) {
+      console.error('Error updating conversation status:', error);
+      return { error };
+    }
+    
+    return { data };
+  } catch (err) {
+    console.error('Exception updating conversation status:', err);
+    return { error: err };
+  }
+}
+
+/**
+ * Store behavioral analysis results
+ * @param {Object} analysisData - The analysis data
+ * @returns {Promise<Object>} - The Supabase response
+ */
+export async function storeBehavioralAnalysis(analysisData) {
+  if (!supabase) {
+    console.error('Supabase not configured. Cannot store analysis.');
+    return { error: { message: 'Supabase not configured' } };
+  }
+  
+  try {
+    const { data, error } = await supabase
+      .from('repspheres_behavioral_analysis')
+      .insert([analysisData])
+      .select();
+      
+    if (error) {
+      console.error('Error storing behavioral analysis:', error);
+      return { error };
+    }
+    
+    return { data };
+  } catch (err) {
+    console.error('Exception storing behavioral analysis:', err);
+    return { error: err };
+  }
+}
+
+/**
+ * Store participant information
+ * @param {Object} participantData - The participant data
+ * @returns {Promise<Object>} - The Supabase response
+ */
+export async function storeParticipant(participantData) {
+  if (!supabase) {
+    console.error('Supabase not configured. Cannot store participant.');
+    return { error: { message: 'Supabase not configured' } };
+  }
+  
+  try {
+    const { data, error } = await supabase
+      .from('repspheres_participants')
+      .insert([participantData])
+      .select();
+      
+    if (error) {
+      console.error('Error storing participant:', error);
+      return { error };
+    }
+    
+    return { data };
+  } catch (err) {
+    console.error('Exception storing participant:', err);
+    return { error: err };
+  }
+}
+
+/**
+ * Get a conversation with its analysis and participants
+ * @param {string} conversationId - The conversation ID
+ * @returns {Promise<Object>} - The conversation data with analysis and participants
+ */
+export async function getConversationWithAnalysis(conversationId) {
+  if (!supabase) {
+    console.error('Supabase not configured. Cannot get conversation.');
+    return { error: { message: 'Supabase not configured' } };
+  }
+  
+  try {
+    // Get the conversation
+    const { data: conversation, error: conversationError } = await supabase
+      .from('repspheres_conversations')
+      .select('*')
+      .eq('id', conversationId)
+      .single();
+      
+    if (conversationError) {
+      console.error('Error getting conversation:', conversationError);
+      return { error: conversationError };
+    }
+    
+    // Get the behavioral analysis
+    const { data: analysis, error: analysisError } = await supabase
+      .from('repspheres_behavioral_analysis')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .single();
+      
+    if (analysisError && analysisError.code !== 'PGRST116') { // Not found is ok
+      console.error('Error getting behavioral analysis:', analysisError);
+      return { error: analysisError };
+    }
+    
+    // Get the participants
+    const { data: participants, error: participantsError } = await supabase
+      .from('repspheres_participants')
+      .select('*')
+      .eq('conversation_id', conversationId);
+      
+    if (participantsError) {
+      console.error('Error getting participants:', participantsError);
+      return { error: participantsError };
+    }
+    
+    return { 
+      data: { 
+        conversation, 
+        analysis: analysis || null, 
+        participants: participants || [] 
+      } 
+    };
+  } catch (err) {
+    console.error('Exception getting conversation with analysis:', err);
+    return { error: err };
+  }
+}
+
+/**
+ * Get all conversations for the current user
+ * @param {number} limit - Optional limit on number of conversations to return
+ * @param {number} offset - Optional offset for pagination
+ * @returns {Promise<Object>} - The conversations
+ */
+export async function getUserConversations(limit = 10, offset = 0) {
+  if (!supabase) {
+    console.error('Supabase not configured. Cannot get user conversations.');
+    return { error: { message: 'Supabase not configured' } };
+  }
+  
+  try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { error: { message: 'User not authenticated' } };
+    }
+    
+    // Get the conversations
+    const { data, error, count } = await supabase
+      .from('repspheres_conversations')
+      .select('*', { count: 'exact' })
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+      
+    if (error) {
+      console.error('Error getting user conversations:', error);
+      return { error };
+    }
+    
+    return { data, count };
+  } catch (err) {
+    console.error('Exception getting user conversations:', err);
+    return { error: err };
+  }
+}
+
 export default {
   sendRequest,
   logActivity,
@@ -226,5 +450,11 @@ export default {
   authenticate,
   register,
   uploadFile,
+  createConversation,
+  updateConversationStatus,
+  storeBehavioralAnalysis,
+  storeParticipant,
+  getConversationWithAnalysis,
+  getUserConversations,
   supabase
 };
