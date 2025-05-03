@@ -153,11 +153,78 @@ export async function register(userData) {
   }
 }
 
+/**
+ * Upload a file to Supabase Storage
+ * @param {File} file - The file to upload
+ * @param {string} filePath - The path to store the file at
+ * @param {Function} progressCallback - Optional callback for upload progress
+ * @returns {Promise<Object>} - The upload result
+ */
+export async function uploadFile(file, filePath, progressCallback = null) {
+  if (!supabase) {
+    console.error('Supabase not configured. File upload not possible.');
+    return { error: { message: 'Supabase storage not configured' } };
+  }
+  
+  try {
+    // Create a bucket if it doesn't exist (only needed first time)
+    const { data: bucketData, error: bucketError } = await supabase
+      .storage
+      .getBucket('audio-files');
+      
+    if (bucketError && bucketError.code === 'PGRST116') {
+      // Bucket doesn't exist, create it
+      const { error: createError } = await supabase
+        .storage
+        .createBucket('audio-files', {
+          public: true,
+          fileSizeLimit: 52428800 // 50MB in bytes
+        });
+        
+      if (createError) {
+        console.error('Error creating bucket:', createError);
+        return { error: createError };
+      }
+    }
+    
+    // Upload the file
+    const { data, error } = await supabase
+      .storage
+      .from('audio-files')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+        onUploadProgress: progressCallback ? 
+          (progress) => {
+            const percent = Math.round((progress.loaded / progress.total) * 100);
+            progressCallback(percent);
+          } : undefined
+      });
+      
+    if (error) {
+      console.error('Error uploading file:', error);
+      return { error };
+    }
+    
+    // Get the public URL
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('audio-files')
+      .getPublicUrl(filePath);
+      
+    return { data: { ...data, publicUrl } };
+  } catch (err) {
+    console.error('Exception uploading file:', err);
+    return { error: err };
+  }
+}
+
 export default {
   sendRequest,
   logActivity,
   checkAuthStatus,
   authenticate,
   register,
+  uploadFile,
   supabase
 };

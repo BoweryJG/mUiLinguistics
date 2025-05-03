@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -26,6 +26,9 @@ const App = () => {
   const [uploadState, setUploadState] = useState('upload'); // upload, selected, uploading, analyzing
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef(null);
   
   // Handle view navigation
   const handleViewChange = (view) => {
@@ -33,31 +36,77 @@ const App = () => {
   };
   
   // Handle file selection and analysis flow
-  const handleFileSelect = () => {
-    setUploadState('selected');
+  const handleFileSelect = (event) => {
+    const file = event?.target?.files?.[0] || null;
+    
+    if (file) {
+      // Check file type
+      const validTypes = ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/x-m4a'];
+      if (!validTypes.includes(file.type)) {
+        setError('Please select a valid audio file (MP3, WAV, or M4A)');
+        return;
+      }
+      
+      // Check file size (max 50MB)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        setError('File size exceeds 50MB limit');
+        return;
+      }
+      
+      setSelectedFile(file);
+      setUploadState('selected');
+      setError('');
+    }
+  };
+  
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
   
   const handleRemoveFile = () => {
     setUploadState('upload');
+    setSelectedFile(null);
+    setError('');
   };
   
   const handleStartAnalysis = async () => {
+    if (!selectedFile) {
+      setError('Please select a file first');
+      return;
+    }
+    
     setLoading(true);
     setError('');
     setUploadState('uploading');
+    setUploadProgress(0);
     
     try {
-      // Simulate upload process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Upload file to Supabase
+      const filePath = `audio/${Date.now()}_${selectedFile.name}`;
+      const { data, error: uploadError } = await api.uploadFile(
+        selectedFile, 
+        filePath,
+        (progress) => {
+          setUploadProgress(progress);
+        }
+      );
+      
+      if (uploadError) {
+        throw new Error(uploadError.message || 'File upload failed');
+      }
       
       setUploadState('analyzing');
       
-      // Call the backend API
+      // Call the backend API with the file URL
       const result = await api.sendRequest({
         action: 'analyze',
         data: {
           meetingType: 'discovery',
-          approach: 'socratic'
+          approach: 'socratic',
+          fileUrl: data?.publicUrl || ''
         }
       });
       
@@ -92,7 +141,7 @@ const App = () => {
       <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white' }}>
         <Toolbar>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mr: 4 }}>
-            RepSphere
+            RepSpheres
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box 
@@ -170,6 +219,9 @@ const App = () => {
             onStartAnalysis={handleStartAnalysis}
             loading={loading}
             error={error}
+            selectedFile={selectedFile}
+            uploadProgress={uploadProgress}
+            fileInputRef={fileInputRef}
           />
         )}
         

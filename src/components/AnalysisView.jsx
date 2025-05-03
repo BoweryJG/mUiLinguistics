@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -19,7 +19,17 @@ import {
 } from '@mui/icons-material';
 import { ProgressBar } from './StyledComponents';
 
-const AnalysisView = ({ uploadState, onFileSelect, onRemoveFile, onStartAnalysis, loading, error }) => {
+const AnalysisView = ({ 
+  uploadState, 
+  onFileSelect, 
+  onRemoveFile, 
+  onStartAnalysis, 
+  loading, 
+  error,
+  selectedFile,
+  uploadProgress,
+  fileInputRef
+}) => {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Card sx={{ maxWidth: '768px', width: '100%' }}>
@@ -28,10 +38,19 @@ const AnalysisView = ({ uploadState, onFileSelect, onRemoveFile, onStartAnalysis
           titleTypographyProps={{ align: 'center' }}
         />
         <CardContent>
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            accept="audio/mpeg,audio/wav,audio/mp4,audio/x-m4a"
+            onChange={onFileSelect}
+          />
+          
           {/* Upload State */}
           {uploadState === 'upload' && (
             <Box 
-              onClick={onFileSelect}
+              onClick={() => fileInputRef.current?.click()}
               sx={{ 
                 border: '2px dashed #e2e8f0', 
                 borderRadius: 3, 
@@ -66,7 +85,16 @@ const AnalysisView = ({ uploadState, onFileSelect, onRemoveFile, onStartAnalysis
                 Drag and drop your audio file here, or click to browse.<br />
                 We support MP3, WAV, and M4A formats.
               </Typography>
-              <Button variant="contained" color="primary">Select Audio File</Button>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                Select Audio File
+              </Button>
               
               <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#64748b' }}>
                 <Mic sx={{ fontSize: '1rem' }} />
@@ -76,7 +104,7 @@ const AnalysisView = ({ uploadState, onFileSelect, onRemoveFile, onStartAnalysis
           )}
           
           {/* File Selected State */}
-          {uploadState === 'selected' && (
+          {uploadState === 'selected' && selectedFile && (
             <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 2, p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -84,8 +112,10 @@ const AnalysisView = ({ uploadState, onFileSelect, onRemoveFile, onStartAnalysis
                     <Headset sx={{ color: 'primary.main' }} />
                   </Box>
                   <Box>
-                    <Typography variant="h4" sx={{ m: 0 }}>Sales_Call_TechCorp_April30.mp3</Typography>
-                    <Typography variant="body2" sx={{ m: 0 }}>8.2 MB</Typography>
+                    <Typography variant="h4" sx={{ m: 0 }}>{selectedFile.name}</Typography>
+                    <Typography variant="body2" sx={{ m: 0 }}>
+                      {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB
+                    </Typography>
                   </Box>
                 </Box>
                 <Button color="error" size="small" onClick={onRemoveFile}>Remove</Button>
@@ -158,6 +188,15 @@ const AnalysisView = ({ uploadState, onFileSelect, onRemoveFile, onStartAnalysis
               />
               <Typography variant="h3" sx={{ mb: 0.5 }}>Uploading your file...</Typography>
               <Typography variant="body2">This should only take a moment</Typography>
+              {uploadProgress > 0 && (
+                <Box sx={{ mt: 2, width: '100%', maxWidth: '20rem', mx: 'auto' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2">Upload progress</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{uploadProgress}%</Typography>
+                  </Box>
+                  <ProgressBar value={uploadProgress} />
+                </Box>
+              )}
             </Box>
           )}
           
