@@ -1,0 +1,1648 @@
+import React, { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  Container,
+  Card,
+  CardHeader,
+  CardContent,
+  Grid,
+  Button,
+  Avatar,
+  LinearProgress,
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  IconButton,
+  Paper,
+  useTheme,
+  ThemeProvider,
+  createTheme,
+  CssBaseline
+} from '@mui/material';
+
+// Material UI Icons
+import {
+  Psychology,
+  TrackChanges,
+  Lightbulb,
+  Chat,
+  FileUpload,
+  Headset,
+  ArrowForward,
+  Send,
+  Schedule,
+  People,
+  CheckCircle,
+  Analytics,
+  Groups,
+  Group,
+  Gavel,
+  Bolt,
+  ThumbDown,
+  TrendingUp,
+  Science,
+  Loop,
+  Hearing,
+  BusinessCenter,
+  Mic,
+  BarChart
+} from '@mui/icons-material';
+
+// Create custom theme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#4f46e5',
+      light: '#6366f1',
+      dark: '#3730a3',
+    },
+    secondary: {
+      main: '#9333ea',
+      light: '#a855f7',
+      dark: '#7e22ce',
+    },
+    success: {
+      main: '#22c55e',
+      light: '#dcfce7',
+      dark: '#15803d',
+    },
+    warning: {
+      main: '#f59e0b',
+      light: '#fef3c7',
+      dark: '#b45309',
+    },
+    error: {
+      main: '#ef4444',
+      light: '#fee2e2',
+      dark: '#b91c1c',
+    },
+    info: {
+      main: '#3b82f6',
+      light: '#dbeafe',
+      dark: '#1d4ed8',
+    },
+    grey: {
+      100: '#f8fafc',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+    },
+    background: {
+      default: '#f5f7fa',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#334155',
+      secondary: '#64748b',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+    },
+    h2: {
+      fontWeight: 700,
+    },
+    h3: {
+      fontWeight: 700,
+      fontSize: '1.25rem',
+    },
+    h4: {
+      fontWeight: 500,
+      fontSize: '1rem',
+    },
+    h5: {
+      fontWeight: 500,
+      fontSize: '0.875rem',
+    },
+    h6: {
+      fontWeight: 500,
+      fontSize: '0.75rem',
+    },
+    body2: {
+      fontSize: '0.875rem',
+      color: '#64748b',
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: 'none',
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+      },
+    },
+  },
+});
+
+// Custom styled components
+const ScoreBadge = ({ score }) => {
+  let bgColor = theme.palette.info.light;
+  let color = theme.palette.info.dark;
+
+  if (score >= 90) {
+    bgColor = theme.palette.success.light;
+    color = theme.palette.success.dark;
+  } else if (score < 80) {
+    bgColor = theme.palette.warning.light;
+    color = theme.palette.warning.dark;
+  }
+
+  return (
+    <Box
+      sx={{
+        width: '3rem',
+        height: '3rem',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.25rem',
+        fontWeight: 600,
+        bgcolor: bgColor,
+        color: color,
+      }}
+    >
+      {score}
+    </Box>
+  );
+};
+
+const IconWrapper = ({ color = 'primary', children }) => {
+  const colorMap = {
+    primary: { bg: '#ede9fe', color: '#4f46e5' },
+    secondary: { bg: '#f3e8ff', color: '#9333ea' },
+    success: { bg: '#dcfce7', color: '#15803d' },
+    warning: { bg: '#fef3c7', color: '#b45309' },
+    info: { bg: '#dbeafe', color: '#1d4ed8' },
+  };
+  
+  const style = colorMap[color] || colorMap.primary;
+  
+  return (
+    <Box
+      sx={{
+        width: '2.5rem',
+        height: '2.5rem',
+        borderRadius: '0.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: style.bg,
+        color: style.color,
+        marginRight: '1rem',
+      }}
+    >
+      {children}
+    </Box>
+  );
+};
+
+const Badge = ({ variant = 'primary', children }) => {
+  const variantMap = {
+    primary: { bg: '#ede9fe', color: '#4f46e5' },
+    success: { bg: '#dcfce7', color: '#15803d' },
+    warning: { bg: '#fef3c7', color: '#b45309' },
+    info: { bg: '#dbeafe', color: '#1d4ed8' },
+    error: { bg: '#fee2e2', color: '#b91c1c' },
+  };
+  
+  const style = variantMap[variant] || variantMap.primary;
+  
+  return (
+    <Box
+      sx={{
+        display: 'inline-block',
+        px: 1,
+        py: 0.5,
+        fontSize: '0.75rem',
+        fontWeight: 500,
+        borderRadius: '0.25rem',
+        bgcolor: style.bg,
+        color: style.color,
+      }}
+    >
+      {children}
+    </Box>
+  );
+};
+
+const ProgressBar = ({ value, color = 'primary' }) => {
+  const getColor = () => {
+    if (value >= 85) return theme.palette.success.main;
+    if (value >= 75) return theme.palette.info.main;
+    return theme.palette.warning.main;
+  };
+  
+  return (
+    <Box sx={{ width: '100%', height: '0.5rem', bgcolor: '#e2e8f0', borderRadius: '1rem', my: 0.5 }}>
+      <Box 
+        sx={{ 
+          height: '100%', 
+          borderRadius: '1rem', 
+          width: `${value}%`,
+          bgcolor: color === 'auto' ? getColor() : theme.palette[color].main,
+        }} 
+      />
+    </Box>
+  );
+};
+
+// Main App Component
+const App = () => {
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [uploadState, setUploadState] = useState('upload'); // upload, selected, uploading, analyzing
+  
+  // Handle view navigation
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+  };
+  
+  // Handle file selection and analysis flow
+  const handleFileSelect = () => {
+    setUploadState('selected');
+  };
+  
+  const handleRemoveFile = () => {
+    setUploadState('upload');
+  };
+  
+  const handleStartAnalysis = () => {
+    setUploadState('uploading');
+    
+    // Simulate upload process
+    setTimeout(() => {
+      setUploadState('analyzing');
+      
+      // Simulate analysis process
+      setTimeout(() => {
+        setCurrentView('complete');
+      }, 3000);
+    }, 2000);
+  };
+  
+  const handleNewAnalysis = () => {
+    setCurrentView('analyze');
+    setUploadState('upload');
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {/* Navigation Bar */}
+        <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white' }}>
+          <Toolbar>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mr: 4 }}>
+              RepSphere
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box 
+                onClick={() => handleViewChange('dashboard')} 
+                sx={{ 
+                  py: 1.5, 
+                  px: 2, 
+                  mx: 0.5, 
+                  borderRadius: 1.5, 
+                  fontWeight: 500, 
+                  fontSize: '0.875rem', 
+                  cursor: 'pointer', 
+                  color: currentView === 'dashboard' ? 'primary.main' : 'text.secondary',
+                  bgcolor: currentView === 'dashboard' ? '#ede9fe' : 'transparent',
+                  '&:hover': { color: currentView === 'dashboard' ? 'primary.main' : 'text.primary' }
+                }}
+              >
+                Dashboard
+              </Box>
+              <Box 
+                onClick={() => handleViewChange('analyze')} 
+                sx={{ 
+                  py: 1.5, 
+                  px: 2, 
+                  mx: 0.5, 
+                  borderRadius: 1.5, 
+                  fontWeight: 500, 
+                  fontSize: '0.875rem', 
+                  cursor: 'pointer', 
+                  color: currentView === 'analyze' ? 'primary.main' : 'text.secondary',
+                  bgcolor: currentView === 'analyze' ? '#ede9fe' : 'transparent',
+                  '&:hover': { color: currentView === 'analyze' ? 'primary.main' : 'text.primary' }
+                }}
+              >
+                New Analysis
+              </Box>
+              <Box 
+                onClick={() => handleViewChange('insights')} 
+                sx={{ 
+                  py: 1.5, 
+                  px: 2, 
+                  mx: 0.5, 
+                  borderRadius: 1.5, 
+                  fontWeight: 500, 
+                  fontSize: '0.875rem', 
+                  cursor: 'pointer', 
+                  color: currentView === 'insights' ? 'primary.main' : 'text.secondary',
+                  bgcolor: currentView === 'insights' ? '#ede9fe' : 'transparent',
+                  '&:hover': { color: currentView === 'insights' ? 'primary.main' : 'text.primary' }
+                }}
+              >
+                Team Insights
+              </Box>
+            </Box>
+            <Box sx={{ marginLeft: 'auto' }}>
+              <Avatar sx={{ bgcolor: '#ede9fe', color: 'primary.main', width: '2rem', height: '2rem', fontWeight: 500 }}>
+                JS
+              </Avatar>
+            </Box>
+          </Toolbar>
+        </AppBar>
+
+        <Container sx={{ py: 4, flex: 1 }}>
+          {/* Dashboard View */}
+          {currentView === 'dashboard' && (
+            <DashboardView onUploadClick={() => handleViewChange('analyze')} />
+          )}
+          
+          {/* Analysis View */}
+          {currentView === 'analyze' && (
+            <AnalysisView 
+              uploadState={uploadState}
+              onFileSelect={handleFileSelect}
+              onRemoveFile={handleRemoveFile}
+              onStartAnalysis={handleStartAnalysis}
+            />
+          )}
+          
+          {/* Complete Analysis View */}
+          {currentView === 'complete' && (
+            <CompleteView onNewAnalysis={handleNewAnalysis} />
+          )}
+          
+          {/* Team Insights View */}
+          {currentView === 'insights' && (
+            <InsightsView />
+          )}
+        </Container>
+      </Box>
+    </ThemeProvider>
+  );
+};
+
+// Dashboard View Component
+const DashboardView = ({ onUploadClick }) => {
+  return (
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={8}>
+        <Card>
+          <CardHeader
+            title="Recent Analyses"
+            action={
+              <Button variant="contained" color="primary" size="small">
+                View All
+              </Button>
+            }
+          />
+          <CardContent>
+            <Box sx={{ '& > :not(:last-child)': { mb: 2 } }}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: 2,
+                  transition: 'all 0.2s',
+                  '&:hover': { bgcolor: '#f8fafc' }
+                }}
+              >
+                <ScoreBadge score={87} />
+                <Box sx={{ ml: 2, flex: 1 }}>
+                  <Typography variant="h4" sx={{ m: 0 }}>Discovery Call - TechCorp</Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>Today at 10:45 AM</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography variant="body2" sx={{ mr: 1 }}>4 insights</Typography>
+                  <ArrowForward fontSize="small" sx={{ color: '#cbd5e1' }} />
+                </Box>
+              </Paper>
+              
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: 2,
+                  transition: 'all 0.2s',
+                  '&:hover': { bgcolor: '#f8fafc' }
+                }}
+              >
+                <ScoreBadge score={92} />
+                <Box sx={{ ml: 2, flex: 1 }}>
+                  <Typography variant="h4" sx={{ m: 0 }}>Demo - Acme Industries</Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>Yesterday at 2:15 PM</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography variant="body2" sx={{ mr: 1 }}>6 insights</Typography>
+                  <ArrowForward fontSize="small" sx={{ color: '#cbd5e1' }} />
+                </Box>
+              </Paper>
+              
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: 2,
+                  transition: 'all 0.2s',
+                  '&:hover': { bgcolor: '#f8fafc' }
+                }}
+              >
+                <ScoreBadge score={76} />
+                <Box sx={{ ml: 2, flex: 1 }}>
+                  <Typography variant="h4" sx={{ m: 0 }}>Follow-up - Global Financial</Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>Apr 28, 11:30 AM</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography variant="body2" sx={{ mr: 1 }}>3 insights</Typography>
+                  <ArrowForward fontSize="small" sx={{ color: '#cbd5e1' }} />
+                </Box>
+              </Paper>
+            </Box>
+          </CardContent>
+        </Card>
+      </Grid>
+      
+      <Grid item xs={12} md={4}>
+        <Card>
+          <CardHeader title="Quick Upload" />
+          <CardContent>
+            <Box 
+              onClick={onUploadClick}
+              sx={{ 
+                border: '2px dashed #e2e8f0', 
+                borderRadius: 3, 
+                p: 4, 
+                textAlign: 'center', 
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                '&:hover': { 
+                  borderColor: 'primary.main',
+                  bgcolor: '#f8fafc' 
+                }
+              }}
+            >
+              <Box 
+                sx={{ 
+                  bgcolor: '#ede9fe', 
+                  color: 'primary.main', 
+                  width: '4rem', 
+                  height: '4rem', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  mx: 'auto', 
+                  mb: 2 
+                }}
+              >
+                <FileUpload fontSize="large" />
+              </Box>
+              <Typography variant="h3" sx={{ mb: 0.5 }}>Upload conversation</Typography>
+              <Typography variant="body2" sx={{ mb: 3 }}>
+                Drop your audio file here or click to browse
+              </Typography>
+              <Button variant="contained" color="primary">Select File</Button>
+            </Box>
+            
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="h3" sx={{ mb: 2 }}>Performance Metrics</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2">Strategy Score</Typography>
+                      <Badge variant="success">+12%</Badge>
+                    </Box>
+                    <Typography variant="h3">84.2</Typography>
+                  </Paper>
+                </Grid>
+                
+                <Grid item xs={6}>
+                  <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2">Calls Analyzed</Typography>
+                      <Badge variant="info">This Week</Badge>
+                    </Box>
+                    <Typography variant="h3">12</Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Box>
+          </CardContent>
+        </Card>
+      </Grid>
+      
+      <Grid item xs={12}>
+        <Card>
+          <CardHeader title="Strategic Insights" />
+          <CardContent>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <IconWrapper color="secondary">
+                      <Psychology />
+                    </IconWrapper>
+                    <Typography variant="h4">Psychology Patterns</Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ mb: 2 }}>Most common prospect profiles</Typography>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2">
+                        <Analytics sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#9333ea' }} />
+                        Analytical
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>42%</Typography>
+                    </Box>
+                    <ProgressBar value={42} color="secondary" />
+                  </Box>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2">
+                        <Groups sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#9333ea' }} />
+                        Collaborative
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>28%</Typography>
+                    </Box>
+                    <ProgressBar value={28} color="secondary" />
+                  </Box>
+                  
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2">
+                        <Gavel sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#9333ea' }} />
+                        Decisive
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>18%</Typography>
+                    </Box>
+                    <ProgressBar value={18} color="secondary" />
+                  </Box>
+                </Paper>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <IconWrapper color="info">
+                      <Bolt />
+                    </IconWrapper>
+                    <Typography variant="h4">Top Persuasion Triggers</Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ mb: 2 }}>Most effective techniques</Typography>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Avatar sx={{ bgcolor: '#dbeafe', color: '#1d4ed8', width: '2rem', height: '2rem', fontSize: '0.875rem', fontWeight: 500 }}>1</Avatar>
+                    <Typography variant="body2">
+                      <Group sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#1d4ed8' }} />
+                      Social proof examples
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Avatar sx={{ bgcolor: '#dbeafe', color: '#1d4ed8', width: '2rem', height: '2rem', fontSize: '0.875rem', fontWeight: 500 }}>2</Avatar>
+                    <Typography variant="body2">
+                      <TrendingUp sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#1d4ed8' }} />
+                      ROI-focused discussion
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ bgcolor: '#dbeafe', color: '#1d4ed8', width: '2rem', height: '2rem', fontSize: '0.875rem', fontWeight: 500 }}>3</Avatar>
+                    <Typography variant="body2">
+                      <Science sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#1d4ed8' }} />
+                      Technical demonstrations
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <IconWrapper color="success">
+                      <TrackChanges />
+                    </IconWrapper>
+                    <Typography variant="h4">Strategic Improvement</Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ mb: 2 }}>Focus areas for team development</Typography>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                    <Typography variant="body2">
+                      <ThumbDown sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#b45309' }} />
+                      Value articulation
+                    </Typography>
+                    <Badge variant="warning">Needs focus</Badge>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                    <Typography variant="body2">
+                      <Loop sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#1d4ed8' }} />
+                      Objection handling
+                    </Typography>
+                    <Badge variant="info">Improving</Badge>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2">
+                      <Hearing sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5, color: '#15803d' }} />
+                      Active listening
+                    </Typography>
+                    <Badge variant="success">Strong</Badge>
+                  </Box>
+                </Paper>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
+  );
+};
+
+// Analysis View Component
+const AnalysisView = ({ uploadState, onFileSelect, onRemoveFile, onStartAnalysis }) => {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Card sx={{ maxWidth: '768px', width: '100%' }}>
+        <CardHeader 
+          title="Analyze Conversation"
+          titleTypographyProps={{ align: 'center' }}
+        />
+        <CardContent>
+          {/* Upload State */}
+          {uploadState === 'upload' && (
+            <Box 
+              onClick={onFileSelect}
+              sx={{ 
+                border: '2px dashed #e2e8f0', 
+                borderRadius: 3, 
+                p: 4, 
+                textAlign: 'center', 
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                '&:hover': { 
+                  borderColor: 'primary.main',
+                  bgcolor: '#f8fafc' 
+                }
+              }}
+            >
+              <Box 
+                sx={{ 
+                  bgcolor: '#ede9fe', 
+                  color: 'primary.main', 
+                  width: '4rem', 
+                  height: '4rem', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  mx: 'auto', 
+                  mb: 2 
+                }}
+              >
+                <Headset fontSize="large" />
+              </Box>
+              <Typography variant="h3" sx={{ mb: 0.5 }}>Upload your conversation</Typography>
+              <Typography variant="body2" sx={{ mb: 3 }}>
+                Drag and drop your audio file here, or click to browse.<br />
+                We support MP3, WAV, and M4A formats.
+              </Typography>
+              <Button variant="contained" color="primary">Select Audio File</Button>
+              
+              <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: '#64748b' }}>
+                <Mic sx={{ fontSize: '1rem' }} />
+                <Typography variant="body2">Or use our recorder for live conversations</Typography>
+              </Box>
+            </Box>
+          )}
+          
+          {/* File Selected State */}
+          {uploadState === 'selected' && (
+            <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 2, p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ bgcolor: '#ede9fe', p: 1.5, borderRadius: 1 }}>
+                    <Headset sx={{ color: 'primary.main' }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="h4" sx={{ m: 0 }}>Sales_Call_TechCorp_April30.mp3</Typography>
+                    <Typography variant="body2" sx={{ m: 0 }}>8.2 MB</Typography>
+                  </Box>
+                </Box>
+                <Button color="error" size="small" onClick={onRemoveFile}>Remove</Button>
+              </Box>
+              
+              <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Meeting type</InputLabel>
+                    <Select defaultValue="discovery" label="Meeting type">
+                      <MenuItem value="discovery">Discovery Call</MenuItem>
+                      <MenuItem value="demo">Demo</MenuItem>
+                      <MenuItem value="followup">Follow-up</MenuItem>
+                      <MenuItem value="closing">Closing</MenuItem>
+                      <MenuItem value="other">Other</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Strategic approach</InputLabel>
+                    <Select defaultValue="socratic" label="Strategic approach">
+                      <MenuItem value="socratic">Socratic Method</MenuItem>
+                      <MenuItem value="consultative">Consultative Selling</MenuItem>
+                      <MenuItem value="spin">SPIN Selling</MenuItem>
+                      <MenuItem value="solution">Solution Selling</MenuItem>
+                      <MenuItem value="challenger">Challenger Sale</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+              
+              <Box sx={{ textAlign: 'right' }}>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  onClick={onStartAnalysis}
+                  startIcon={<BarChart />}
+                >
+                  Analyze Conversation
+                </Button>
+              </Box>
+            </Box>
+          )}
+          
+          {/* Uploading State */}
+          {uploadState === 'uploading' && (
+            <Box sx={{ textAlign: 'center', py: 6, px: 2 }}>
+              <Box 
+                sx={{ 
+                  width: '4rem', 
+                  height: '4rem', 
+                  border: '4px solid rgba(79, 70, 229, 0.2)', 
+                  borderRadius: '50%', 
+                  borderTop: '4px solid #4f46e5', 
+                  animation: 'spin 1s linear infinite', 
+                  mx: 'auto', 
+                  mb: 3,
+                  '@keyframes spin': {
+                    to: { transform: 'rotate(360deg)' }
+                  }
+                }} 
+              />
+              <Typography variant="h3" sx={{ mb: 0.5 }}>Uploading your file...</Typography>
+              <Typography variant="body2">This should only take a moment</Typography>
+            </Box>
+          )}
+          
+          {/* Analyzing State */}
+          {uploadState === 'analyzing' && (
+            <Box sx={{ textAlign: 'center', py: 4, px: 2 }}>
+              <Box 
+                sx={{ 
+                  width: '4rem', 
+                  height: '4rem', 
+                  border: '4px solid rgba(79, 70, 229, 0.2)', 
+                  borderRadius: '50%', 
+                  borderTop: '4px solid #4f46e5', 
+                  animation: 'spin 1s linear infinite', 
+                  mx: 'auto', 
+                  mb: 3,
+                  '@keyframes spin': {
+                    to: { transform: 'rotate(360deg)' }
+                  }
+                }} 
+              />
+              <Typography variant="h3" sx={{ mb: 0.5 }}>Analyzing conversation</Typography>
+              <Typography variant="body2" sx={{ mb: 4 }}>Our AI is extracting insights from your conversation</Typography>
+              
+              <Box sx={{ maxWidth: '32rem', mx: 'auto' }}>
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2">Transcribing audio</Typography>
+                    <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>Complete</Typography>
+                  </Box>
+                  <ProgressBar value={100} />
+                </Box>
+                
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2">Analyzing content</Typography>
+                    <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>75%</Typography>
+                  </Box>
+                  <ProgressBar value={75} />
+                </Box>
+                
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2">Generating insights</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>Waiting</Typography>
+                  </Box>
+                  <ProgressBar value={0} color="grey" />
+                </Box>
+              </Box>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
+  );
+};
+
+// Complete Analysis View Component
+const CompleteView = ({ onNewAnalysis }) => {
+  return (
+    <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="h2" sx={{ mb: 0.5, fontSize: '1.5rem', fontWeight: 700 }}>Discovery Call - TechCorp</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Schedule fontSize="small" sx={{ color: 'text.secondary' }} />
+              <Typography variant="body2">April 30, 2025 • 32 minutes</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <People fontSize="small" sx={{ color: 'text.secondary' }} />
+              <Typography variant="body2">John Smith (Sales), Emily Chen (Prospect)</Typography>
+            </Box>
+          </Box>
+        </Box>
+        <Button size="small" onClick={onNewAnalysis}>New Analysis</Button>
+      </Box>
+      
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Summary Card */}
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                  <IconWrapper color="info">
+                    <Chat />
+                  </IconWrapper>
+                  <Typography variant="h4">Conversation Summary</Typography>
+                </Box>
+                
+                <Typography sx={{ mb: 3, color: 'text.primary' }}>
+                  Discovery call focused on TechCorp's data analytics challenges. Emily expressed 
+                  frustration with their current system's scalability issues and is looking for a 
+                  solution that can handle 500GB+ of daily data processing with better integration 
+                  capabilities.
+                </Typography>
+                
+                <Typography variant="h4" sx={{ mb: 1.5, fontWeight: 500 }}>Key Points</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <CheckCircle fontSize="small" sx={{ color: 'success.main', mt: 0.5 }} />
+                    <Typography>Pain point: Current analytics system not scaling with growth</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <CheckCircle fontSize="small" sx={{ color: 'success.main', mt: 0.5 }} />
+                    <Typography>Decision criteria: Performance, integration, and cost</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <CheckCircle fontSize="small" sx={{ color: 'success.main', mt: 0.5 }} />
+                    <Typography>Timeline: Looking to implement within Q3</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <CheckCircle fontSize="small" sx={{ color: 'success.main', mt: 0.5 }} />
+                    <Typography>Budget: $50-75K allocated for the project</Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+            
+            {/* Psychology and Strategy Cards */}
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                      <IconWrapper color="secondary">
+                        <Psychology />
+                      </IconWrapper>
+                      <Typography variant="h4">Psychological Profile</Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Box>
+                        <Typography variant="h5" sx={{ mb: 0.5, color: 'text.secondary' }}>Communication Style</Typography>
+                        <Typography sx={{ color: 'text.primary' }}>Analytical</Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="h5" sx={{ mb: 0.5, color: 'text.secondary' }}>Pain Points</Typography>
+                        <Typography sx={{ color: 'text.primary' }}>Technical limitations, Efficiency concerns</Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="h5" sx={{ mb: 0.5, color: 'text.secondary' }}>Decision Factors</Typography>
+                        <Typography sx={{ color: 'text.primary' }}>ROI, Technical specifications, Support quality</Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="h5" sx={{ mb: 0.5, color: 'text.secondary' }}>Persuasion Triggers</Typography>
+                        <Typography sx={{ color: 'text.primary' }}>Data-driven proof, Technical demonstrations</Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                      <IconWrapper color="success">
+                        <TrackChanges />
+                      </IconWrapper>
+                      <Typography variant="h4">Strategic Analysis</Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography variant="h5" sx={{ color: 'text.secondary' }}>Socratic Approach</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>85%</Typography>
+                        </Box>
+                        <ProgressBar value={85} color="success" />
+                      </Box>
+                      
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography variant="h5" sx={{ color: 'text.secondary' }}>Active Listening</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>92%</Typography>
+                        </Box>
+                        <ProgressBar value={92} color="success" />
+                      </Box>
+                      
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography variant="h5" sx={{ color: 'text.secondary' }}>Needs Discovery</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>78%</Typography>
+                        </Box>
+                        <ProgressBar value={78} color="info" />
+                      </Box>
+                      
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography variant="h5" sx={{ color: 'text.secondary' }}>Value Articulation</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>70%</Typography>
+                        </Box>
+                        <ProgressBar value={70} color="warning" />
+                      </Box>
+                      
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography variant="h5" sx={{ color: 'text.secondary' }}>Objection Handling</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>83%</Typography>
+                        </Box>
+                        <ProgressBar value={83} color="info" />
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+            
+            {/* Key Moments Card */}
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                  <IconWrapper color="warning">
+                    <Lightbulb />
+                  </IconWrapper>
+                  <Typography variant="h4">Key Conversation Moments</Typography>
+                </Box>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, pb: 2, borderBottom: '1px solid #f1f5f9' }}>
+                    <Box sx={{ textAlign: 'center', minWidth: '5rem' }}>
+                      <Badge sx={{ mb: 0.5 }}>08:42</Badge>
+                      <Badge variant="error">Pain Point</Badge>
+                    </Box>
+                    <Box>
+                      <Typography sx={{ color: 'text.primary' }}>Prospect mentioned scalability challenges with current system</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, pb: 2, borderBottom: '1px solid #f1f5f9' }}>
+                    <Box sx={{ textAlign: 'center', minWidth: '5rem' }}>
+                      <Badge sx={{ mb: 0.5 }}>12:15</Badge>
+                      <Badge variant="success">Buying Signal</Badge>
+                    </Box>
+                    <Box>
+                      <Typography sx={{ color: 'text.primary' }}>Asked about implementation timeline and resource requirements</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, pb: 2, borderBottom: '1px solid #f1f5f9' }}>
+                    <Box sx={{ textAlign: 'center', minWidth: '5rem' }}>
+                      <Badge sx={{ mb: 0.5 }}>18:30</Badge>
+                      <Badge variant="warning">Objection</Badge>
+                    </Box>
+                    <Box>
+                      <Typography sx={{ color: 'text.primary' }}>Concern about integration with existing MarTech stack</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <Box sx={{ textAlign: 'center', minWidth: '5rem' }}>
+                      <Badge sx={{ mb: 0.5 }}>24:18</Badge>
+                      <Badge variant="info">Agreement</Badge>
+                    </Box>
+                    <Box>
+                      <Typography sx={{ color: 'text.primary' }}>Acknowledged value proposition of real-time analytics feature</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        </Grid>
+        
+        <Grid item xs={12} md={4}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Next Steps Card */}
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                  <IconWrapper>
+                    <ArrowForward />
+                  </IconWrapper>
+                  <Typography variant="h4">Next Steps</Typography>
+                </Box>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                    <Box 
+                      sx={{ 
+                        width: '1.5rem', 
+                        height: '1.5rem', 
+                        borderRadius: '50%', 
+                        bgcolor: '#ede9fe', 
+                        color: 'primary.main', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 500, 
+                        flexShrink: 0 
+                      }}
+                    >
+                      1
+                    </Box>
+                    <Typography sx={{ color: 'text.primary' }}>Send technical specifications document by May 2</Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                    <Box 
+                      sx={{ 
+                        width: '1.5rem', 
+                        height: '1.5rem', 
+                        borderRadius: '50%', 
+                        bgcolor: '#ede9fe', 
+                        color: 'primary.main', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 500, 
+                        flexShrink: 0 
+                      }}
+                    >
+                      2
+                    </Box>
+                    <Typography sx={{ color: 'text.primary' }}>Schedule technical demo with IT team for next week</Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                    <Box 
+                      sx={{ 
+                        width: '1.5rem', 
+                        height: '1.5rem', 
+                        borderRadius: '50%', 
+                        bgcolor: '#ede9fe', 
+                        color: 'primary.main', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 500, 
+                        flexShrink: 0 
+                      }}
+                    >
+                      3
+                    </Box>
+                    <Typography sx={{ color: 'text.primary' }}>Prepare customized ROI analysis based on their data volume</Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                    <Box 
+                      sx={{ 
+                        width: '1.5rem', 
+                        height: '1.5rem', 
+                        borderRadius: '50%', 
+                        bgcolor: '#ede9fe', 
+                        color: 'primary.main', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 500, 
+                        flexShrink: 0 
+                      }}
+                    >
+                      4
+                    </Box>
+                    <Typography sx={{ color: 'text.primary' }}>Follow up on budget approval process mentioned at 26:12</Typography>
+                  </Box>
+                </Box>
+                
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  fullWidth 
+                  startIcon={<BusinessCenter />}
+                >
+                  Add to CRM
+                </Button>
+              </CardContent>
+            </Card>
+            
+            {/* Follow-up Actions Card */}
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                  <IconWrapper color="success">
+                    <Send />
+                  </IconWrapper>
+                  <Typography variant="h4">Follow-up Actions</Typography>
+                </Box>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Checkbox id="email" />
+                      <Typography component="label" htmlFor="email" variant="body2">Send follow-up email</Typography>
+                    </Box>
+                    <Button 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: '#f8fafc', 
+                        color: '#64748b', 
+                        fontSize: '0.75rem', 
+                        py: 0.5, 
+                        px: 1 
+                      }}
+                    >
+                      Template
+                    </Button>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Checkbox id="meeting" />
+                      <Typography component="label" htmlFor="meeting" variant="body2">Schedule demo meeting</Typography>
+                    </Box>
+                    <Button 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: '#f8fafc', 
+                        color: '#64748b', 
+                        fontSize: '0.75rem', 
+                        py: 0.5, 
+                        px: 1 
+                      }}
+                    >
+                      Calendar
+                    </Button>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Checkbox id="task" />
+                      <Typography component="label" htmlFor="task" variant="body2">Create ROI analysis</Typography>
+                    </Box>
+                    <Button 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: '#f8fafc', 
+                        color: '#64748b', 
+                        fontSize: '0.75rem', 
+                        py: 0.5, 
+                        px: 1 
+                      }}
+                    >
+                      Task
+                    </Button>
+                  </Box>
+                </Box>
+                
+                <Button 
+                  variant="outlined" 
+                  fullWidth 
+                  sx={{ mt: 3, borderColor: 'primary.main', color: 'primary.main' }}
+                >
+                  Export Analysis as PDF
+                </Button>
+              </CardContent>
+            </Card>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+// Team Insights View Component
+const InsightsView = () => {
+  return (
+    <Box>
+      <Card sx={{ mb: 3 }}>
+        <CardHeader title="Team Performance" />
+        <CardContent>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>Conversations Analyzed</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>248</Typography>
+                <Typography variant="h6" sx={{ color: 'success.main', mt: 0.5 }}>+12% from last month</Typography>
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>Avg. Strategy Score</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>76.8%</Typography>
+                <Typography variant="h6" sx={{ color: 'success.main', mt: 0.5 }}>+3.2% from last month</Typography>
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>Top Performer</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>Sarah J.</Typography>
+                <Typography variant="h6" sx={{ color: 'info.main', mt: 0.5 }}>94.2% strategy score</Typography>
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>Growth Opportunity</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700 }}>Value Articulation</Typography>
+                <Typography variant="h6" sx={{ color: 'warning.main', mt: 0.5 }}>Team avg: 68.3%</Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+          
+          <Box sx={{ borderTop: '1px solid #e2e8f0', pt: 3 }}>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: 500 }}>Strategy Execution by Rep</Typography>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: '9rem', fontSize: '0.875rem' }}>Sarah Johnson</Box>
+                <Box sx={{ flex: 1, mx: 2 }}>
+                  <ProgressBar value={94.2} color="success" />
+                </Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.875rem', fontWeight: 500 }}>94.2%</Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.75rem', color: 'success.main' }}>+2.1%</Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: '9rem', fontSize: '0.875rem' }}>Michael Taylor</Box>
+                <Box sx={{ flex: 1, mx: 2 }}>
+                  <ProgressBar value={87.5} color="success" />
+                </Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.875rem', fontWeight: 500 }}>87.5%</Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.75rem', color: 'success.main' }}>+4.3%</Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: '9rem', fontSize: '0.875rem' }}>David Rodriguez</Box>
+                <Box sx={{ flex: 1, mx: 2 }}>
+                  <ProgressBar value={82.1} color="success" />
+                </Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.875rem', fontWeight: 500 }}>82.1%</Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.75rem', color: 'success.main' }}>+1.8%</Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: '9rem', fontSize: '0.875rem' }}>Emily Chen</Box>
+                <Box sx={{ flex: 1, mx: 2 }}>
+                  <ProgressBar value={79.8} color="info" />
+                </Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.875rem', fontWeight: 500 }}>79.8%</Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.75rem', color: 'error.main' }}>-0.7%</Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: '9rem', fontSize: '0.875rem' }}>Alex Washington</Box>
+                <Box sx={{ flex: 1, mx: 2 }}>
+                  <ProgressBar value={72.4} color="info" />
+                </Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.875rem', fontWeight: 500 }}>72.4%</Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.75rem', color: 'success.main' }}>+5.2%</Box>
+              </Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: '9rem', fontSize: '0.875rem' }}>Jessica Lee</Box>
+                <Box sx={{ flex: 1, mx: 2 }}>
+                  <ProgressBar value={68.9} color="warning" />
+                </Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.875rem', fontWeight: 500 }}>68.9%</Box>
+                <Box sx={{ width: '4rem', textAlign: 'right', fontSize: '0.75rem', color: 'success.main' }}>+2.4%</Box>
+              </Box>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+      
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader title="Strategy Breakdown" />
+            <CardContent>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 500 }}>Active Listening</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>85.2%</Typography>
+                  </Box>
+                  <ProgressBar value={85.2} color="info" />
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    Strong overall, but 32% of reps interrupt prospects more than 3 times per call
+                  </Typography>
+                </Box>
+                
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 500 }}>Socratic Questioning</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>78.9%</Typography>
+                  </Box>
+                  <ProgressBar value={78.9} color="info" />
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    Good use of open-ended questions, opportunity to improve follow-up questioning
+                  </Typography>
+                </Box>
+                
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 500 }}>Needs Discovery</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>82.4%</Typography>
+                  </Box>
+                  <ProgressBar value={82.4} color="info" />
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    Strong at identifying technical needs, opportunity to improve on business impact discovery
+                  </Typography>
+                </Box>
+                
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 500 }}>Value Articulation</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>68.3%</Typography>
+                  </Box>
+                  <ProgressBar value={68.3} color="warning" />
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    Needs improvement in connecting features to specific customer pain points
+                  </Typography>
+                </Box>
+                
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 500 }}>Objection Handling</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>75.8%</Typography>
+                  </Box>
+                  <ProgressBar value={75.8} color="info" />
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    Good at technical objections, opportunity to improve on pricing and implementation concerns
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader title="Conversation Insights" />
+            <CardContent>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 500 }}>Talk-to-Listen Ratio</Typography>
+                  <Box sx={{ display: 'flex', height: '2rem', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                    <Box 
+                      sx={{ 
+                        width: '42%', 
+                        bgcolor: 'info.main', 
+                        color: 'white', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 500 
+                      }}
+                    >
+                      Rep: 42%
+                    </Box>
+                    <Box 
+                      sx={{ 
+                        width: '58%', 
+                        bgcolor: 'success.main', 
+                        color: 'white', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '0.75rem', 
+                        fontWeight: 500 
+                      }}
+                    >
+                      Prospect: 58%
+                    </Box>
+                  </Box>
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    Ideal ratio achieved by top performers: 35% / 65%
+                  </Typography>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 500 }}>Most Effective Questions</Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Paper sx={{ bgcolor: '#f8fafc', p: 1.5, borderRadius: 1, fontSize: '0.875rem' }}>
+                      "What impact does this challenge have on your business goals?"
+                    </Paper>
+                    <Paper sx={{ bgcolor: '#f8fafc', p: 1.5, borderRadius: 1, fontSize: '0.875rem' }}>
+                      "How are you measuring success for this initiative?"
+                    </Paper>
+                    <Paper sx={{ bgcolor: '#f8fafc', p: 1.5, borderRadius: 1, fontSize: '0.875rem' }}>
+                      "What would an ideal solution look like for your team?"
+                    </Paper>
+                  </Box>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 500 }}>Common Objections</Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="body2">Integration complexity</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: '6rem', bgcolor: '#e2e8f0', height: '0.375rem', borderRadius: '1rem', mr: 1 }}>
+                          <Box sx={{ bgcolor: 'primary.main', height: '0.375rem', borderRadius: '1rem', width: '97%' }} />
+                        </Box>
+                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>68</Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="body2">Cost concerns</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: '6rem', bgcolor: '#e2e8f0', height: '0.375rem', borderRadius: '1rem', mr: 1 }}>
+                          <Box sx={{ bgcolor: 'primary.main', height: '0.375rem', borderRadius: '1rem', width: '77%' }} />
+                        </Box>
+                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>54</Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="body2">Implementation timeline</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: '6rem', bgcolor: '#e2e8f0', height: '0.375rem', borderRadius: '1rem', mr: 1 }}>
+                          <Box sx={{ bgcolor: 'primary.main', height: '0.375rem', borderRadius: '1rem', width: '67%' }} />
+                        </Box>
+                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>47</Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="body2">Training requirements</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: '6rem', bgcolor: '#e2e8f0', height: '0.375rem', borderRadius: '1rem', mr: 1 }}>
+                          <Box sx={{ bgcolor: 'primary.main', height: '0.375rem', borderRadius: '1rem', width: '50%' }} />
+                        </Box>
+                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>35</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 500 }}>Training Recommendations</Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                      <Box 
+                        sx={{ 
+                          bgcolor: '#fef3c7', 
+                          color: '#b45309', 
+                          p: 0.5, 
+                          borderRadius: 0.5, 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center' 
+                        }}
+                      >
+                        <TrackChanges fontSize="small" />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>Value Articulation Workshop</Typography>
+                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>Connecting features to business outcomes</Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                      <Box 
+                        sx={{ 
+                          bgcolor: '#dbeafe', 
+                          color: '#1d4ed8', 
+                          p: 0.5, 
+                          borderRadius: 0.5, 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center' 
+                        }}
+                      >
+                        <Psychology fontSize="small" />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>Advanced Objection Handling</Typography>
+                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>Techniques for financial and ROI objections</Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                      <Box 
+                        sx={{ 
+                          bgcolor: '#dcfce7', 
+                          color: '#15803d', 
+                          p: 0.5, 
+                          borderRadius: 0.5, 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center' 
+                        }}
+                      >
+                        <Chat fontSize="small" />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>Effective Follow-up Questions</Typography>
+                        <Typography variant="h6" sx={{ color: 'text.secondary' }}>Deepen discovery with clarifying questions</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+export default App;

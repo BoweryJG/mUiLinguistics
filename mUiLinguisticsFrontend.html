@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepSphere Linguistics Analyzer</title>
+    
+    <!-- MUI CSS -->
+    <link href="//cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --gray-color: #64748b;
+            --gray-light: #e2e8f0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: #334155;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .mui-appbar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .app-logo {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-right: 2rem;
+        }
+        
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover {
+            color: #334155;
+        }
+        
+        .nav-item.active {
+            background-color: #ede9fe;
+            color: var(--primary-color);
+        }
+        
+        .avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: #ede9fe;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .score-badge {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .score-high {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        
+        .score-medium {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .score-low {
+            background-color: #fef3c7;
+            color: #b45309;
+        }
+        
+        .analysis-item {
+            display: flex;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .analysis-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #f8fafc;
+        }
+        
+        .upload-icon {
+            background-color: #ede9fe;
+            color: var(--primary-color);
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 0.5rem;
+            background-color: #e2e8f0;
+            border-radius: 1rem;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 1rem;
+            background-color: var(--primary-color);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 0.25rem;
+        }
+        
+        .badge-success {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #b45309;
+        }
+        
+        .badge-info {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .badge-primary {
+            background-color: #ede9fe;
+            color: var(--primary-color);
+        }
+        
+        .icon-wrapper {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        
+        .icon-brain {
+            background-color: #f3e8ff;
+            color: #9333ea;
+        }
+        
+        .icon-target {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        
+        .icon-lightbulb {
+            background-color: #fef3c7;
+            color: #b45309;
+        }
+        
+        .icon-message {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .timeline-point {
+            position: relative;
+            padding-left: 2.5rem;
+            padding-bottom: 1.5rem;
+        }
+        
+        .timeline-point:before {
+            content: '';
+            position: absolute;
+            left: 0.5625rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e2e8f0;
+        }
+        
+        .timeline-point:last-child {
+            padding-bottom: 0;
+        }
+        
+        .timeline-point:last-child:before {
+            display: none;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .mui-btn--primary {
+            background-color: var(--primary-color);
+        }
+        
+        .mui-btn--primary:hover, .mui-btn--primary:focus {
+            background-color: var(--primary-dark);
+        }
+        
+        .tab-content > div {
+            display: none;
+        }
+        
+        .tab-content > div.active {
+            display: block;
+        }
+        
+        .grid {
+            display: grid;
+            grid-gap: 1.5rem;
+        }
+        
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, 1fr);
+        }
+        
+        @media (min-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .grid-cols-4 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .spinner {
+            width: 4rem;
+            height: 4rem;
+            border: 4px solid rgba(79, 70, 229, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spinner 1s linear infinite;
+        }
+        
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* View States */
+        #analyze-view, #insights-view, #complete-view {
+            display: none;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-gray {
+            color: var(--gray-color);
+        }
+        
+        .text-success {
+            color: var(--success-color);
+        }
+        
+        .text-primary {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="mui-appbar">
+        <div class="mui-container">
+            <div class="flex items-center" style="height: 64px;">
+                <div class="app-logo">RepSphere</div>
+                <div class="flex items-center">
+                    <div class="nav-item active" data-view="dashboard">Dashboard</div>
+                    <div class="nav-item" data-view="analyze">New Analysis</div>
+                    <div class="nav-item" data-view="insights">Team Insights</div>
+                </div>
+                <div style="margin-left: auto;">
+                    <div class="avatar">JS</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mui-container">
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="mui--pt-4">
+            <div class="grid grid-cols-1">
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <h2 class="card-title">Recent Analyses</h2>
+                        <button class="mui-btn mui-btn--small mui-btn--primary">View All</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="analysis-item">
+                            <div class="score-badge score-medium">87</div>
+                            <div style="margin-left: 1rem; flex: 1;">
+                                <h3 style="margin: 0;">Discovery Call - TechCorp</h3>
+                                <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.875rem;">Today at 10:45 AM</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span style="color: #64748b; font-size: 0.875rem; margin-right: 0.5rem;">4 insights</span>
+                                <i class="material-icons" style="font-size: 1rem; color: #cbd5e1;">arrow_forward</i>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="score-badge score-high">92</div>
+                            <div style="margin-left: 1rem; flex: 1;">
+                                <h3 style="margin: 0;">Demo - Acme Industries</h3>
+                                <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.875rem;">Yesterday at 2:15 PM</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span style="color: #64748b; font-size: 0.875rem; margin-right: 0.5rem;">6 insights</span>
+                                <i class="material-icons" style="font-size: 1rem; color: #cbd5e1;">arrow_forward</i>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <div class="score-badge score-low">76</div>
+                            <div style="margin-left: 1rem; flex: 1;">
+                                <h3 style="margin: 0;">Follow-up - Global Financial</h3>
+                                <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.875rem;">Apr 28, 11:30 AM</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span style="color: #64748b; font-size: 0.875rem; margin-right: 0.5rem;">3 insights</span>
+                                <i class="material-icons" style="font-size: 1rem; color: #cbd5e1;">arrow_forward</i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="grid-column: span 1;">
+                    <div class="card-header">
+                        <h2 class="card-title">Quick Upload</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="dashboard-upload-btn">
+                            <div class="upload-icon">
+                                <i class="material-icons" style="font-size: 2rem;">file_upload</i>
+                            </div>
+                            <h3 style="margin: 0 0 0.5rem;">Upload conversation</h3>
+                            <p style="margin: 0 0 1.5rem; color: #64748b; font-size: 0.875rem;">
+                                Drop your audio file here or click to browse
+                            </p>
+                            <button class="mui-btn mui-btn--primary">Select File</button>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <h3 style="margin: 0 0 1rem;">Performance Metrics</h3>
+                            <div class="grid grid-cols-2">
+                                <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1rem;">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm text-gray">Strategy Score</span>
+                                        <span class="badge badge-success">+12%</span>
+                                    </div>
+                                    <div style="font-size: 1.25rem; font-weight: 700;">84.2</div>
+                                </div>
+                                
+                                <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1rem;">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm text-gray">Calls Analyzed</span>
+                                        <span class="badge badge-info">This Week</span>
+                                    </div>
+                                    <div style="font-size: 1.25rem; font-weight: 700;">12</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <h2 class="card-title">Strategic Insights</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-cols-3">
+                            <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1.25rem;">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="icon-wrapper icon-brain">
+                                        <i class="material-icons">psychology</i>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 1rem;">Psychology Patterns</h3>
+                                </div>
+                                <p class="text-sm text-gray mb-4">Most common prospect profiles</p>
+                                
+                                <div class="mb-4">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm text-gray">
+                                            <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #9333ea;">analytics</i>
+                                            Analytical
+                                        </span>
+                                        <span style="font-size: 0.875rem; font-weight: 500;">42%</span>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 42%; background-color: #9333ea;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm text-gray">
+                                            <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #9333ea;">groups</i>
+                                            Collaborative
+                                        </span>
+                                        <span style="font-size: 0.875rem; font-weight: 500;">28%</span>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 28%; background-color: #9333ea;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm text-gray">
+                                            <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #9333ea;">gavel</i>
+                                            Decisive
+                                        </span>
+                                        <span style="font-size: 0.875rem; font-weight: 500;">18%</span>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 18%; background-color: #9333ea;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1.25rem;">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="icon-wrapper" style="background-color: #dbeafe; color: #1d4ed8;">
+                                        <i class="material-icons">bolt</i>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 1rem;">Top Persuasion Triggers</h3>
+                                </div>
+                                <p class="text-sm text-gray mb-4">Most effective techniques</p>
+                                
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div style="width: 2rem; height: 2rem; border-radius: 50%; background-color: #dbeafe; color: #1d4ed8; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 500;">1</div>
+                                    <span style="font-size: 0.875rem;">
+                                        <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #1d4ed8;">group</i>
+                                        Social proof examples
+                                    </span>
+                                </div>
+                                
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div style="width: 2rem; height: 2rem; border-radius: 50%; background-color: #dbeafe; color: #1d4ed8; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 500;">2</div>
+                                    <span style="font-size: 0.875rem;">
+                                        <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #1d4ed8;">trending_up</i>
+                                        ROI-focused discussion
+                                    </span>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <div style="width: 2rem; height: 2rem; border-radius: 50%; background-color: #dbeafe; color: #1d4ed8; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 500;">3</div>
+                                    <span style="font-size: 0.875rem;">
+                                        <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #1d4ed8;">science</i>
+                                        Technical demonstrations
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1.25rem;">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="icon-wrapper icon-target">
+                                        <i class="material-icons">track_changes</i>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 1rem;">Strategic Improvement</h3>
+                                </div>
+                                <p class="text-sm text-gray mb-4">Focus areas for team development</p>
+                                
+                                <div class="flex justify-between mb-4">
+                                    <span class="text-sm text-gray">
+                                        <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #b45309;">thumb_down</i>
+                                        Value articulation
+                                    </span>
+                                    <span class="badge badge-warning">Needs focus</span>
+                                </div>
+                                
+                                <div class="flex justify-between mb-4">
+                                    <span class="text-sm text-gray">
+                                        <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #1d4ed8;">loop</i>
+                                        Objection handling
+                                    </span>
+                                    <span class="badge badge-info">Improving</span>
+                                </div>
+                                
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray">
+                                        <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.25rem; color: #15803d;">hearing</i>
+                                        Active listening
+                                    </span>
+                                    <span class="badge badge-success">Strong</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analysis View -->
+        <div id="analyze-view" class="mui--pt-4">
+            <div class="card" style="max-width: 768px; margin: 0 auto;">
+                <div class="card-header">
+                    <h2 class="card-title" style="text-align: center;">Analyze Conversation</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Upload State -->
+                    <div id="upload-state">
+                        <div class="upload-area">
+                            <div class="upload-icon">
+                                <i class="material-icons" style="font-size: 2rem;">headset</i>
+                            </div>
+                            <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Upload your conversation</h3>
+                            <p style="margin: 0 0 1.5rem; color: #64748b;">
+                                Drag and drop your audio file here, or click to browse.<br>
+                                We support MP3, WAV, and M4A formats.
+                            </p>
+                            <button class="mui-btn mui-btn--primary" id="select-file-btn">Select Audio File</button>
+                            
+                            <div style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: #64748b;">
+                                <i class="material-icons" style="font-size: 1rem;">mic</i>
+                                <span style="font-size: 0.875rem;">Or use our recorder for live conversations</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- File Selected State -->
+                    <div id="file-selected-state" style="display: none;">
+                        <div style="border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem;">
+                            <div class="flex justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div style="background-color: #ede9fe; padding: 0.75rem; border-radius: 0.5rem;">
+                                        <i class="material-icons" style="color: var(--primary-color);">headset</i>
+                                    </div>
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 1rem;">Sales_Call_TechCorp_April30.mp3</h3>
+                                        <p style="margin: 0; font-size: 0.875rem; color: #64748b;">8.2 MB</p>
+                                    </div>
+                                </div>
+                                <button class="mui-btn mui-btn--small" id="remove-file-btn" style="color: #ef4444;">Remove</button>
+                            </div>
+                            
+                            <div class="grid grid-cols-2" style="gap: 1.5rem; margin-bottom: 1.5rem;">
+                                <div>
+                                    <label class="mui--text-subhead" style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500;">Meeting type</label>
+                                    <div class="mui-select">
+                                        <select>
+                                            <option>Discovery Call</option>
+                                            <option>Demo</option>
+                                            <option>Follow-up</option>
+                                            <option>Closing</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="mui--text-subhead" style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500;">Strategic approach</label>
+                                    <div class="mui-select">
+                                        <select>
+                                            <option>Socratic Method</option>
+                                            <option>Consultative Selling</option>
+                                            <option>SPIN Selling</option>
+                                            <option>Solution Selling</option>
+                                            <option>Challenger Sale</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: right;">
+                                <button class="mui-btn mui-btn--primary" id="start-analysis-btn">
+                                    <i class="material-icons" style="font-size: 1.25rem; vertical-align: middle; margin-right: 0.5rem;">bar_chart</i>
+                                    Analyze Conversation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Uploading State -->
+                    <div id="uploading-state" style="display: none; text-align: center; padding: 3rem 1rem;">
+                        <div class="spinner" style="margin: 0 auto 1.5rem;"></div>
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Uploading your file...</h3>
+                        <p style="margin: 0; color: #64748b;">This should only take a moment</p>
+                    </div>
+                    
+                    <!-- Analyzing State -->
+                    <div id="analyzing-state" style="display: none; text-align: center; padding: 2rem 1rem;">
+                        <div class="spinner" style="margin: 0 auto 1.5rem;"></div>
+                        <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem;">Analyzing conversation</h3>
+                        <p style="margin: 0 0 2rem; color: #64748b;">Our AI is extracting insights from your conversation</p>
+                        
+                        <div style="max-width: 32rem; margin: 0 auto;">
+                            <div style="margin-bottom: 1rem;">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span style="color: #64748b;">Transcribing audio</span>
+                                    <span style="color: var(--primary-color); font-weight: 500;">Complete</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 100%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span style="color: #64748b;">Analyzing content</span>
+                                    <span style="color: var(--primary-color); font-weight: 500;">75%</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span style="color: #64748b;">Generating insights</span>
+                                    <span style="color: #64748b; font-weight: 500;">Waiting</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 0%; background-color: #cbd5e1;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Complete Analysis View -->
+        <div id="complete-view" class="mui--pt-4">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 style="margin: 0 0 0.5rem; font-size: 1.5rem; font-weight: 700;">Discovery Call - TechCorp</h2>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-1 text-sm text-gray">
+                                <i class="material-icons" style="font-size: 1rem;">schedule</i>
+                                <span>April 30, 2025 • 32 minutes</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-sm text-gray">
+                                <i class="material-icons" style="font-size: 1rem;">people</i>
+                                <span>John Smith (Sales), Emily Chen (Prospect)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="mui-btn mui-btn--small" id="new-analysis-btn">New Analysis</button>
+                </div>
+                
+                <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+                    <div class="flex flex-col gap-4">
+                        <!-- Summary Card -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="icon-wrapper icon-message">
+                                        <i class="material-icons">chat</i>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 1rem;">Conversation Summary</h3>
+                                </div>
+                                
+                                <p style="margin: 0 0 1.5rem; color: #334155;">
+                                    Discovery call focused on TechCorp's data analytics challenges. Emily expressed 
+                                    frustration with their current system's scalability issues and is looking for a 
+                                    solution that can handle 500GB+ of daily data processing with better integration 
+                                    capabilities.
+                                </p>
+                                
+                                <h4 style="margin: 0 0 0.75rem; font-size: 1rem; font-weight: 500;">Key Points</h4>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <div class="flex items-start gap-2">
+                                        <i class="material-icons" style="font-size: 1rem; color: var(--success-color); margin-top: 0.25rem;">check_circle</i>
+                                        <span>Pain point: Current analytics system not scaling with growth</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <i class="material-icons" style="font-size: 1rem; color: var(--success-color); margin-top: 0.25rem;">check_circle</i>
+                                        <span>Decision criteria: Performance, integration, and cost</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <i class="material-icons" style="font-size: 1rem; color: var(--success-color); margin-top: 0.25rem;">check_circle</i>
+                                        <span>Timeline: Looking to implement within Q3</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <i class="material-icons" style="font-size: 1rem; color: var(--success-color); margin-top: 0.25rem;">check_circle</i>
+                                        <span>Budget: $50-75K allocated for the project</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Psychology and Strategy Cards -->
+                        <div class="grid grid-cols-2" style="gap: 1.5rem;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <div class="icon-wrapper icon-brain">
+                                            <i class="material-icons">psychology</i>
+                                        </div>
+                                        <h3 style="margin: 0; font-size: 1rem;">Psychological Profile</h3>
+                                    </div>
+                                    
+                                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                        <div>
+                                            <h4 style="margin: 0 0 0.25rem; font-size: 0.875rem; font-weight: 500; color: #64748b;">Communication Style</h4>
+                                            <p style="margin: 0; color: #334155;">Analytical</p>
+                                        </div>
+                                        <div>
+                                            <h4 style="margin: 0 0 0.25rem; font-size: 0.875rem; font-weight: 500; color: #64748b;">Pain Points</h4>
+                                            <p style="margin: 0; color: #334155;">Technical limitations, Efficiency concerns</p>
+                                        </div>
+                                        <div>
+                                            <h4 style="margin: 0 0 0.25rem; font-size: 0.875rem; font-weight: 500; color: #64748b;">Decision Factors</h4>
+                                            <p style="margin: 0; color: #334155;">ROI, Technical specifications, Support quality</p>
+                                        </div>
+                                        <div>
+                                            <h4 style="margin: 0 0 0.25rem; font-size: 0.875rem; font-weight: 500; color: #64748b;">Persuasion Triggers</h4>
+                                            <p style="margin: 0; color: #334155;">Data-driven proof, Technical demonstrations</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <div class="icon-wrapper icon-target">
+                                            <i class="material-icons">track_changes</i>
+                                        </div>
+                                        <h3 style="margin: 0; font-size: 1rem;">Strategic Analysis</h3>
+                                    </div>
+                                    
+                                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <h4 style="margin: 0; font-size: 0.875rem; font-weight: 500; color: #64748b;">Socratic Approach</h4>
+                                                <span style="font-size: 0.875rem; font-weight: 500;">85%</span>
+                                            </div>
+                                            <div class="progress-container">
+                                                <div class="progress-bar" style="width: 85%; background-color: var(--success-color);"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <h4 style="margin: 0; font-size: 0.875rem; font-weight: 500; color: #64748b;">Active Listening</h4>
+                                                <span style="font-size: 0.875rem; font-weight: 500;">92%</span>
+                                            </div>
+                                            <div class="progress-container">
+                                                <div class="progress-bar" style="width: 92%; background-color: var(--success-color);"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <h4 style="margin: 0; font-size: 0.875rem; font-weight: 500; color: #64748b;">Needs Discovery</h4>
+                                                <span style="font-size: 0.875rem; font-weight: 500;">78%</span>
+                                            </div>
+                                            <div class="progress-container">
+                                                <div class="progress-bar" style="width: 78%; background-color: var(--info-color);"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <h4 style="margin: 0; font-size: 0.875rem; font-weight: 500; color: #64748b;">Value Articulation</h4>
+                                                <span style="font-size: 0.875rem; font-weight: 500;">70%</span>
+                                            </div>
+                                            <div class="progress-container">
+                                                <div class="progress-bar" style="width: 70%; background-color: var(--warning-color);"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div class="flex justify-between mb-2">
+                                                <h4 style="margin: 0; font-size: 0.875rem; font-weight: 500; color: #64748b;">Objection Handling</h4>
+                                                <span style="font-size: 0.875rem; font-weight: 500;">83%</span>
+                                            </div>
+                                            <div class="progress-container">
+                                                <div class="progress-bar" style="width: 83%; background-color: var(--info-color);"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Key Moments Card -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="icon-wrapper icon-lightbulb">
+                                        <i class="material-icons">lightbulb</i>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 1rem;">Key Conversation Moments</h3>
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                    <div class="flex items-start gap-4" style="padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
+                                        <div style="text-align: center; min-width: 5rem;">
+                                            <div class="badge badge-primary" style="margin-bottom: 0.25rem;">08:42</div>
+                                            <div class="badge" style="background-color: #fee2e2; color: #b91c1c;">Pain Point</div>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 0; color: #334155;">Prospect mentioned scalability challenges with current system</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-4" style="padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
+                                        <div style="text-align: center; min-width: 5rem;">
+                                            <div class="badge badge-primary" style="margin-bottom: 0.25rem;">12:15</div>
+                                            <div class="badge" style="background-color: #dcfce7; color: #15803d;">Buying Signal</div>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 0; color: #334155;">Asked about implementation timeline and resource requirements</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-4" style="padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
+                                        <div style="text-align: center; min-width: 5rem;">
+                                            <div class="badge badge-primary" style="margin-bottom: 0.25rem;">18:30</div>
+                                            <div class="badge" style="background-color: #fef3c7; color: #b45309;">Objection</div>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 0; color: #334155;">Concern about integration with existing MarTech stack</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-4">
+                                        <div style="text-align: center; min-width: 5rem;">
+                                            <div class="badge badge-primary" style="margin-bottom: 0.25rem;">24:18</div>
+                                            <div class="badge" style="background-color: #dbeafe; color: #1d4ed8;">Agreement</div>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 0; color: #334155;">Acknowledged value proposition of real-time analytics feature</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-4">
+                        <!-- Next Steps Card -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="icon-wrapper" style="background-color: #ede9fe; color: var(--primary-color);">
+                                        <i class="material-icons">arrow_forward</i>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 1rem;">Next Steps</h3>
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                                    <div class="flex items-start gap-3">
+                                        <div style="width: 1.5rem; height: 1.5rem; border-radius: 50%; background-color: #ede9fe; color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500; flex-shrink: 0;">1</div>
+                                        <p style="margin: 0; color: #334155;">Send technical specifications document by May 2</p>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-3">
+                                        <div style="width: 1.5rem; height: 1.5rem; border-radius: 50%; background-color: #ede9fe; color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500; flex-shrink: 0;">2</div>
+                                        <p style="margin: 0; color: #334155;">Schedule technical demo with IT team for next week</p>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-3">
+                                        <div style="width: 1.5rem; height: 1.5rem; border-radius: 50%; background-color: #ede9fe; color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500; flex-shrink: 0;">3</div>
+                                        <p style="margin: 0; color: #334155;">Prepare customized ROI analysis based on their data volume</p>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-3">
+                                        <div style="width: 1.5rem; height: 1.5rem; border-radius: 50%; background-color: #ede9fe; color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500; flex-shrink: 0;">4</div>
+                                        <p style="margin: 0; color: #334155;">Follow up on budget approval process mentioned at 26:12</p>
+                                    </div>
+                                </div>
+                                
+                                <button class="mui-btn mui-btn--primary mui-btn--raised" style="width: 100%;">
+                                    <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-right: 0.5rem;">business_center</i>
+                                    Add to CRM
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Follow-up Actions Card -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="icon-wrapper" style="background-color: #dcfce7; color: #15803d;">
+                                        <i class="material-icons">send</i>
+                                    </div>
+                                    <h3 style="margin: 0; font-size: 1rem;">Follow-up Actions</h3>
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" id="email" class="mui-checkbox">
+                                            <label for="email" style="font-size: 0.875rem;">Send follow-up email</label>
+                                        </div>
+                                        <button class="mui-btn mui-btn--small" style="background-color: #f8fafc; color: #64748b; font-size: 0.75rem; padding: 0.25rem 0.5rem;">Template</button>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" id="meeting" class="mui-checkbox">
+                                            <label for="meeting" style="font-size: 0.875rem;">Schedule demo meeting</label>
+                                        </div>
+                                        <button class="mui-btn mui-btn--small" style="background-color: #f8fafc; color: #64748b; font-size: 0.75rem; padding: 0.25rem 0.5rem;">Calendar</button>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" id="task" class="mui-checkbox">
+                                            <label for="task" style="font-size: 0.875rem;">Create ROI analysis</label>
+                                        </div>
+                                        <button class="mui-btn mui-btn--small" style="background-color: #f8fafc; color: #64748b; font-size: 0.75rem; padding: 0.25rem 0.5rem;">Task</button>
+                                    </div>
+                                </div>
+                                
+                                <button class="mui-btn" style="width: 100%; margin-top: 1.5rem; border: 1px solid var(--primary-color); color: var(--primary-color);">
+                                    Export Analysis as PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Team Insights View -->
+        <div id="insights-view" class="mui--pt-4">
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h2 class="card-title">Team Performance</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-cols-4" style="gap: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1.25rem;">
+                            <div class="text-sm text-gray mb-2">Conversations Analyzed</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">248</div>
+                            <div style="font-size: 0.75rem; color: var(--success-color); margin-top: 0.25rem;">+12% from last month</div>
+                        </div>
+                        
+                        <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1.25rem;">
+                            <div class="text-sm text-gray mb-2">Avg. Strategy Score</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">76.8%</div>
+                            <div style="font-size: 0.75rem; color: var(--success-color); margin-top: 0.25rem;">+3.2% from last month</div>
+                        </div>
+                        
+                        <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1.25rem;">
+                            <div class="text-sm text-gray mb-2">Top Performer</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">Sarah J.</div>
+                            <div style="font-size: 0.75rem; color: var(--info-color); margin-top: 0.25rem;">94.2% strategy score</div>
+                        </div>
+                        
+                        <div style="background-color: #f8fafc; border-radius: 0.5rem; padding: 1.25rem;">
+                            <div class="text-sm text-gray mb-2">Growth Opportunity</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">Value Articulation</div>
+                            <div style="font-size: 0.75rem; color: var(--warning-color); margin-top: 0.25rem;">Team avg: 68.3%</div>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
+                        <h3 style="margin: 0 0 1rem; font-size: 1rem; font-weight: 500;">Strategy Execution by Rep</h3>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div class="flex items-center">
+                                <div style="width: 9rem; font-size: 0.875rem;">Sarah Johnson</div>
+                                <div style="flex: 1; margin: 0 1rem;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 94.2%; background-color: var(--success-color);"></div>
+                                    </div>
+                                </div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.875rem; font-weight: 500;">94.2%</div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.75rem; color: var(--success-color);">+2.1%</div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div style="width: 9rem; font-size: 0.875rem;">Michael Taylor</div>
+                                <div style="flex: 1; margin: 0 1rem;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 87.5%; background-color: var(--success-color);"></div>
+                                    </div>
+                                </div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.875rem; font-weight: 500;">87.5%</div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.75rem; color: var(--success-color);">+4.3%</div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div style="width: 9rem; font-size: 0.875rem;">David Rodriguez</div>
+                                <div style="flex: 1; margin: 0 1rem;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 82.1%; background-color: var(--success-color);"></div>
+                                    </div>
+                                </div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.875rem; font-weight: 500;">82.1%</div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.75rem; color: var(--success-color);">+1.8%</div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div style="width: 9rem; font-size: 0.875rem;">Emily Chen</div>
+                                <div style="flex: 1; margin: 0 1rem;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 79.8%; background-color: var(--info-color);"></div>
+                                    </div>
+                                </div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.875rem; font-weight: 500;">79.8%</div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.75rem; color: var(--danger-color);">-0.7%</div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div style="width: 9rem; font-size: 0.875rem;">Alex Washington</div>
+                                <div style="flex: 1; margin: 0 1rem;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 72.4%; background-color: var(--info-color);"></div>
+                                    </div>
+                                </div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.875rem; font-weight: 500;">72.4%</div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.75rem; color: var(--success-color);">+5.2%</div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div style="width: 9rem; font-size: 0.875rem;">Jessica Lee</div>
+                                <div style="flex: 1; margin: 0 1rem;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: 68.9%; background-color: var(--warning-color);"></div>
+                                    </div>
+                                </div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.875rem; font-weight: 500;">68.9%</div>
+                                <div style="width: 4rem; text-align: right; font-size: 0.75rem; color: var(--success-color);">+2.4%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2" style="gap: 1.5rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Strategy Breakdown</h2>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="margin: 0; font-size: 1rem; font-weight: 500;">Active Listening</h3>
+                                    <span style="font-size: 0.875rem; font-weight: 500;">85.2%</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 85.2%; background-color: var(--info-color);"></div>
+                                </div>
+                                <div class="text-sm text-gray mt-2">
+                                    Strong overall, but 32% of reps interrupt prospects more than 3 times per call
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="margin: 0; font-size: 1rem; font-weight: 500;">Socratic Questioning</h3>
+                                    <span style="font-size: 0.875rem; font-weight: 500;">78.9%</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 78.9%; background-color: var(--info-color);"></div>
+                                </div>
+                                <div class="text-sm text-gray mt-2">
+                                    Good use of open-ended questions, opportunity to improve follow-up questioning
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="margin: 0; font-size: 1rem; font-weight: 500;">Needs Discovery</h3>
+                                    <span style="font-size: 0.875rem; font-weight: 500;">82.4%</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 82.4%; background-color: var(--info-color);"></div>
+                                </div>
+                                <div class="text-sm text-gray mt-2">
+                                    Strong at identifying technical needs, opportunity to improve on business impact discovery
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="margin: 0; font-size: 1rem; font-weight: 500;">Value Articulation</h3>
+                                    <span style="font-size: 0.875rem; font-weight: 500;">68.3%</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 68.3%; background-color: var(--warning-color);"></div>
+                                </div>
+                                <div class="text-sm text-gray mt-2">
+                                    Needs improvement in connecting features to specific customer pain points
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="margin: 0; font-size: 1rem; font-weight: 500;">Objection Handling</h3>
+                                    <span style="font-size: 0.875rem; font-weight: 500;">75.8%</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: 75.8%; background-color: var(--info-color);"></div>
+                                </div>
+                                <div class="text-sm text-gray mt-2">
+                                    Good at technical objections, opportunity to improve on pricing and implementation concerns
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Conversation Insights</h2>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <div>
+                                <h3 style="margin: 0 0 1rem; font-size: 1rem; font-weight: 500;">Talk-to-Listen Ratio</h3>
+                                <div style="display: flex; height: 2rem; border-radius: 0.5rem; overflow: hidden;">
+                                    <div style="width: 42%; background-color: var(--info-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500;">
+                                        Rep: 42%
+                                    </div>
+                                    <div style="width: 58%; background-color: var(--success-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500;">
+                                        Prospect: 58%
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray mt-2">
+                                    Ideal ratio achieved by top performers: 35% / 65%
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 style="margin: 0 0 1rem; font-size: 1rem; font-weight: 500;">Most Effective Questions</h3>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <div style="background-color: #f8fafc; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem;">
+                                        "What impact does this challenge have on your business goals?"
+                                    </div>
+                                    <div style="background-color: #f8fafc; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem;">
+                                        "How are you measuring success for this initiative?"
+                                    </div>
+                                    <div style="background-color: #f8fafc; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.875rem;">
+                                        "What would an ideal solution look like for your team?"
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 style="margin: 0 0 1rem; font-size: 1rem; font-weight: 500;">Common Objections</h3>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <div class="flex items-center justify-between">
+                                        <span style="font-size: 0.875rem;">Integration complexity</span>
+                                        <div class="flex items-center">
+                                            <div style="width: 6rem; background-color: #e2e8f0; height: 0.375rem; border-radius: 1rem; margin-right: 0.5rem;">
+                                                <div style="background-color: var(--primary-color); height: 0.375rem; border-radius: 1rem; width: 97%;"></div>
+                                            </div>
+                                            <span style="font-size: 0.75rem; color: #64748b;">68</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <span style="font-size: 0.875rem;">Cost concerns</span>
+                                        <div class="flex items-center">
+                                            <div style="width: 6rem; background-color: #e2e8f0; height: 0.375rem; border-radius: 1rem; margin-right: 0.5rem;">
+                                                <div style="background-color: var(--primary-color); height: 0.375rem; border-radius: 1rem; width: 77%;"></div>
+                                            </div>
+                                            <span style="font-size: 0.75rem; color: #64748b;">54</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <span style="font-size: 0.875rem;">Implementation timeline</span>
+                                        <div class="flex items-center">
+                                            <div style="width: 6rem; background-color: #e2e8f0; height: 0.375rem; border-radius: 1rem; margin-right: 0.5rem;">
+                                                <div style="background-color: var(--primary-color); height: 0.375rem; border-radius: 1rem; width: 67%;"></div>
+                                            </div>
+                                            <span style="font-size: 0.75rem; color: #64748b;">47</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <span style="font-size: 0.875rem;">Training requirements</span>
+                                        <div class="flex items-center">
+                                            <div style="width: 6rem; background-color: #e2e8f0; height: 0.375rem; border-radius: 1rem; margin-right: 0.5rem;">
+                                                <div style="background-color: var(--primary-color); height: 0.375rem; border-radius: 1rem; width: 50%;"></div>
+                                            </div>
+                                            <span style="font-size: 0.75rem; color: #64748b;">35</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 style="margin: 0 0 1rem; font-size: 1rem; font-weight: 500;">Training Recommendations</h3>
+                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <div class="flex items-start gap-3">
+                                        <div style="background-color: #fef3c7; color: #b45309; padding: 0.25rem; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                                            <i class="material-icons" style="font-size: 1rem;">track_changes</i>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.875rem; font-weight: 500;">Value Articulation Workshop</div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">Connecting features to business outcomes</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-3">
+                                        <div style="background-color: #dbeafe; color: #1d4ed8; padding: 0.25rem; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                                            <i class="material-icons" style="font-size: 1rem;">psychology</i>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.875rem; font-weight: 500;">Advanced Objection Handling</div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">Techniques for financial and ROI objections</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start gap-3">
+                                        <div style="background-color: #dcfce7; color: #15803d; padding: 0.25rem; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                                            <i class="material-icons" style="font-size: 1rem;">chat</i>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.875rem; font-weight: 500;">Effective Follow-up Questions</div>
+                                            <div style="font-size: 0.75rem; color: #64748b;">Deepen discovery with clarifying questions</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MUI JavaScript -->
+    <script src="//cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // View Navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            const dashboardView = document.getElementById('dashboard-view');
+            const analyzeView = document.getElementById('analyze-view');
+            const insightsView = document.getElementById('insights-view');
+            const completeView = document.getElementById('complete-view');
+            
+            function showView(viewName) {
+                // Hide all views
+                dashboardView.style.display = 'none';
+                analyzeView.style.display = 'none';
+                insightsView.style.display = 'none';
+                completeView.style.display = 'none';
+                
+                // Show the selected view
+                if (viewName === 'dashboard') {
+                    dashboardView.style.display = 'block';
+                } else if (viewName === 'analyze') {
+                    analyzeView.style.display = 'block';
+                } else if (viewName === 'insights') {
+                    insightsView.style.display = 'block';
+                } else if (viewName === 'complete') {
+                    completeView.style.display = 'block';
+                }
+                
+                // Update active nav item
+                navItems.forEach(item => {
+                    if (item.dataset.view === viewName) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    showView(this.dataset.view);
+                });
+            });
+            
+            // File Upload States
+            const uploadState = document.getElementById('upload-state');
+            const fileSelectedState = document.getElementById('file-selected-state');
+            const uploadingState = document.getElementById('uploading-state');
+            const analyzingState = document.getElementById('analyzing-state');
+            
+            const selectFileBtn = document.getElementById('select-file-btn');
+            const removeFileBtn = document.getElementById('remove-file-btn');
+            const startAnalysisBtn = document.getElementById('start-analysis-btn');
+            const dashboardUploadBtn = document.getElementById('dashboard-upload-btn');
+            const newAnalysisBtn = document.getElementById('new-analysis-btn');
+            
+            function showUploadState(stateName) {
+                uploadState.style.display = 'none';
+                fileSelectedState.style.display = 'none';
+                uploadingState.style.display = 'none';
+                analyzingState.style.display = 'none';
+                
+                if (stateName === 'upload') {
+                    uploadState.style.display = 'block';
+                } else if (stateName === 'selected') {
+                    fileSelectedState.style.display = 'block';
+                } else if (stateName === 'uploading') {
+                    uploadingState.style.display = 'block';
+                } else if (stateName === 'analyzing') {
+                    analyzingState.style.display = 'block';
+                }
+            }
+            
+            // File Selection
+            selectFileBtn.addEventListener('click', function() {
+                showUploadState('selected');
+            });
+            
+            removeFileBtn.addEventListener('click', function() {
+                showUploadState('upload');
+            });
+            
+            // Analysis Process
+            startAnalysisBtn.addEventListener('click', function() {
+                showUploadState('uploading');
+                
+                // Simulate upload process
+                setTimeout(function() {
+                    showUploadState('analyzing');
+                    
+                    // Simulate analysis process
+                    setTimeout(function() {
+                        showView('complete');
+                    }, 3000);
+                }, 2000);
+            });
+            
+            // Dashboard quick upload
+            dashboardUploadBtn.addEventListener('click', function() {
+                showView('analyze');
+                showUploadState('upload');
+            });
+            
+            // New analysis button
+            newAnalysisBtn.addEventListener('click', function() {
+                showView('analyze');
+                showUploadState('upload');
+            });
+        });
+    </script>
+</body>
+</html>
