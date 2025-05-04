@@ -18,7 +18,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
  * @param {string} endpoint - The API endpoint (default: '/task')
  * @returns {Promise<Object>} - The API response
  */
-export async function sendRequest(data, endpoint = '/task') {
+export async function sendRequest(data, endpoint = '/webhook') {
   try {
     // Ensure proper URL construction by handling trailing slashes
     const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
@@ -26,10 +26,19 @@ export async function sendRequest(data, endpoint = '/task') {
     const url = `${baseUrl}${apiEndpoint}`;
     console.log(`Sending request to: ${url}`);
     
+    // Format the payload according to the API's expected format
+    // The API expects a payload with a "filename" field
+    const payload = {
+      filename: data.data?.fileUrl || '',
+      ...data
+    };
+    
+    console.log('Sending payload:', payload);
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
       credentials: 'include'
     });
     
