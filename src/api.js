@@ -70,7 +70,10 @@ export async function sendRequest(data, endpoint = '/webhook') {
     try {
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeaders() // Add authorization headers
+        },
         body: JSON.stringify(payload),
         // Removed credentials to make it compatible with CORS proxy
         signal: controller.signal
@@ -140,32 +143,75 @@ export async function logActivity(activity) {
 }
 
 /**
+ * Get user token from localStorage
+ * @returns {string|null} The JWT token
+ */
+export function getUserToken() {
+  if (!supabase) return null;
+  const session = supabase.auth.session();
+  return session?.access_token || null;
+}
+
+/**
+ * Include authorization header in API requests
+ * @returns {Object} Headers object with Authorization
+ */
+export function getAuthHeaders() {
+  const token = getUserToken();
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+/**
+ * Get current user's usage statistics
+ * @returns {Promise<Object>} Usage data
+ */
+export async function getUserUsage() {
+  try {
+    const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+    
+    // Use CORS proxy to bypass CORS restrictions
+    const corsProxyUrl = 'https://corsproxy.io/?';
+    const targetUrl = `${baseUrl}/user/usage`;
+    const url = `${corsProxyUrl}${encodeURIComponent(targetUrl)}`;
+    
+    const response = await fetch(url, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error getting usage: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching usage:', error);
+    throw error;
+  }
+}
+
+/**
  * Check user authentication status
  * @returns {Promise<Object>} - The authentication status
  */
 export async function checkAuthStatus() {
   try {
-    // Return a default response without making an API call
-    // This prevents "failed to fetch" errors when the endpoint doesn't exist
-    console.log('Auth check bypassed - endpoint not available');
-    return { 
-      authenticated: false,
-      user: null
-    };
-    
-    // Original implementation - commented out to prevent fetch errors
-    /*
-    const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
-    const response = await fetch(`${baseUrl}/auth/status`, {
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      return { authenticated: false };
+    if (!supabase) {
+      console.log('Supabase not configured - auth check bypassed');
+      return { authenticated: false, user: null };
     }
     
-    return await response.json();
-    */
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return { authenticated: false, user: null };
+    }
+    
+    return { 
+      authenticated: true,
+      user: session.user
+    };
   } catch (err) {
     console.error('Error checking authentication status:', err);
     return { authenticated: false };

@@ -537,6 +537,13 @@ const App = () => {
       </AppBar>
 
       <Container sx={{ py: 4, flex: 1 }}>
+        {/* Subscription Info - Only show when authenticated */}
+        {isAuthenticated && currentView !== 'complete' && (
+          <React.Suspense fallback={<div>Loading subscription info...</div>}>
+            {/* Lazy load the SubscriptionInfo component */}
+            {React.createElement(React.lazy(() => import('./components/SubscriptionInfo')))}
+          </React.Suspense>
+        )}
         {/* Dashboard View */}
         {currentView === 'dashboard' && (
           <DashboardView onUploadClick={() => handleViewChange('analyze')} />

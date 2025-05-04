@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Typography,
   Box,
@@ -30,6 +31,10 @@ const AnalysisView = ({
   uploadProgress,
   fileInputRef
 }) => {
+  const { subscription } = useAuth();
+  
+  // Check if user has reached their quota
+  const hasReachedQuota = subscription && subscription.usage >= subscription.quota;
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Card sx={{ maxWidth: '768px', width: '100%' }}>
@@ -155,6 +160,20 @@ const AnalysisView = ({
               )}
               
               <Box sx={{ textAlign: 'right' }}>
+              {hasReachedQuota ? (
+                <Box sx={{ textAlign: 'center', mb: 2 }}>
+                  <Typography variant="body2" color="error" sx={{ mb: 1 }}>
+                    You've reached your monthly quota. Please upgrade your plan to continue.
+                  </Typography>
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={() => window.open('https://yourstore.lemonsqueezy.com/checkout/buy/basic-plan-id', '_blank')}
+                  >
+                    Upgrade Plan
+                  </Button>
+                </Box>
+              ) : (
                 <Button 
                   variant="contained" 
                   color="primary" 
@@ -164,6 +183,7 @@ const AnalysisView = ({
                 >
                   {loading ? 'Processing...' : 'Analyze Conversation'}
                 </Button>
+              )}
               </Box>
             </Box>
           )}
