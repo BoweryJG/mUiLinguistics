@@ -96,10 +96,14 @@ export const AuthProvider = ({ children }) => {
       const data = await api.authenticate(credentials.password, userData);
       setUser(data.user);
       setSession(data.session);
+      setIsAuthenticated(true);
+      setError(null);
       localStorage.setItem('lastEmail', credentials.email);
       // Store the token for API calls
       if (data.session) {
         localStorage.setItem('authToken', data.session.access_token);
+        // Fetch user's usage data immediately after login
+        await fetchUsageData();
       }
       return data;
     } catch (error) {
