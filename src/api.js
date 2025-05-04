@@ -23,8 +23,13 @@ export async function sendRequest(data, endpoint = '/webhook') {
     // Ensure proper URL construction by handling trailing slashes
     const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
     const apiEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = `${baseUrl}${apiEndpoint}`;
-    console.log(`Sending request to: ${url}`);
+    
+    // Use CORS proxy to bypass CORS restrictions
+    const corsProxyUrl = 'https://corsproxy.io/?';
+    const targetUrl = `${baseUrl}${apiEndpoint}`;
+    const url = `${corsProxyUrl}${encodeURIComponent(targetUrl)}`;
+    
+    console.log(`Sending request through CORS proxy to: ${targetUrl}`);
     
     // Add better error handling with timeouts and retry logic
     const controller = new AbortController();
