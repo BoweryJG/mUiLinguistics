@@ -43,6 +43,7 @@ const App = () => {
   // Handle view navigation
   const handleViewChange = (view) => {
     setCurrentView(view);
+    setError('');
   };
   
   // Handle file selection and analysis flow
@@ -325,7 +326,30 @@ const App = () => {
       setCurrentView('complete');
     } catch (err) {
       console.error('Analysis error:', err);
-      setError(err.message || 'An error occurred during analysis');
+      
+      // Provide more specific error messages based on the error type
+      let errorMessage = 'An error occurred during analysis';
+      
+      if (err.message.includes('timed out')) {
+        errorMessage = 'The analysis request timed out. The AI processing service might be experiencing high load or starting up after inactivity. Please try again in a few moments.';
+      } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        errorMessage = 'Network error: Unable to reach the analysis server. Please check your internet connection and try again, or the server might be temporarily unavailable.';
+      } else if (err.message.includes('HTTP error')) {
+        errorMessage = `Server error: ${err.message}. The analysis service might be experiencing issues.`;
+      } else {
+        errorMessage = err.message || 'An error occurred during analysis';
+      }
+      
+      // Update the conversation status to error if we have a conversation ID
+      try {
+        if (typeof conversationId !== 'undefined' && conversationId) {
+          await api.updateConversationStatus(conversationId, 'error', errorMessage);
+        }
+      } catch (updateErr) {
+        console.error('Failed to update conversation status:', updateErr);
+      }
+      
+      setError(errorMessage);
       setUploadState('selected');
     } finally {
       setLoading(false);
@@ -335,6 +359,7 @@ const App = () => {
   const handleNewAnalysis = () => {
     setCurrentView('analyze');
     setUploadState('upload');
+    setError('');
   };
 
   // New state for auth dialogs and user menu

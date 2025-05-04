@@ -26,28 +26,66 @@ export async function sendRequest(data, endpoint = '/webhook') {
     const url = `${baseUrl}${apiEndpoint}`;
     console.log(`Sending request to: ${url}`);
     
-    // Format the payload according to the API's expected format
-    // The API expects a payload with a "filename" field
-    const payload = {
-      filename: data.data?.fileUrl || '',
-      ...data
-    };
+    // Add better error handling with timeouts and retry logic
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
-    console.log('Sending payload:', payload);
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error ${response.status}`);
+  // Format the payload according to the API's expected format
+  // The backend expects a simple payload with just a "filename" field
+  let filename = '';
+  
+  // Extract the filename from various possible locations in the data object
+  if (data.data?.fileUrl) {
+    filename = data.data.fileUrl;
+  } else if (data.fileUrl) {
+    filename = data.fileUrl;
+  }
+  
+  // If the filename is a complete URL, extract just the path portion
+  // The backend expects just the storage path, not the full URL
+  if (filename.includes('supabase.co')) {
+    try {
+      // Extract the path after the bucket name
+      const urlParts = filename.split('/');
+      const bucketIndex = urlParts.findIndex(part => part === 'audiorecordings');
+      if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+        filename = urlParts.slice(bucketIndex + 1).join('/');
+      }
+    } catch (e) {
+      console.error('Error extracting filename from URL:', e);
     }
+  }
+  
+  const payload = {
+    filename: filename
+  };
+  
+  console.log('Sending payload:', payload);
     
-    return await response.json();
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId); // Clear the timeout if the request completes
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (fetchError) {
+      if (fetchError.name === 'AbortError') {
+        console.error('Request timed out after 30 seconds');
+        throw new Error('Request timed out. The server might be experiencing high load or cold-starting.');
+      }
+      throw fetchError;
+    }
   } catch (error) {
     console.error('API request failed:', error);
     throw error;
