@@ -24,46 +24,20 @@ export async function sendRequest(data, endpoint = '/webhook') {
     const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
     const apiEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     
-    // Use CORS proxy to bypass CORS restrictions
-    const corsProxyUrl = 'https://corsproxy.io/?';
-    const targetUrl = `${baseUrl}${apiEndpoint}`;
-    const url = `${corsProxyUrl}${encodeURIComponent(targetUrl)}`;
+    // Try direct connection first, no CORS proxy
+    const url = `${baseUrl}${apiEndpoint}`;
     
-    console.log(`Sending request through CORS proxy to: ${targetUrl}`);
+    console.log(`Sending direct request to: ${url}`);
     
     // Add better error handling with timeouts and retry logic
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
-  // Format the payload according to the API's expected format
-  // The backend expects a simple payload with just a "filename" field
-  let filename = '';
+  // Format the payload according to the backend's expected format
+  // Send the complete data object as is, without modifying it
+  const payload = data;
   
-  // Extract the filename from various possible locations in the data object
-  if (data.data?.fileUrl) {
-    filename = data.data.fileUrl;
-  } else if (data.fileUrl) {
-    filename = data.fileUrl;
-  }
-  
-  // If the filename is a complete URL, extract just the path portion
-  // The backend expects just the storage path, not the full URL
-  if (filename.includes('supabase.co')) {
-    try {
-      // Extract the path after the bucket name
-      const urlParts = filename.split('/');
-      const bucketIndex = urlParts.findIndex(part => part === 'audiorecordings');
-      if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
-        filename = urlParts.slice(bucketIndex + 1).join('/');
-      }
-    } catch (e) {
-      console.error('Error extracting filename from URL:', e);
-    }
-  }
-  
-  const payload = {
-    filename: filename
-  };
+  // Log the payload for debugging
   
   console.log('Sending payload:', payload);
     
@@ -75,10 +49,12 @@ export async function sendRequest(data, endpoint = '/webhook') {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
           ...headers // Add authorization headers
         },
         body: JSON.stringify(payload),
-        // Removed credentials to make it compatible with CORS proxy
+        mode: 'cors',
+        credentials: 'include',
         signal: controller.signal
       });
       
