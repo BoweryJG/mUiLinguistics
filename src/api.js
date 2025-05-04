@@ -266,8 +266,14 @@ export async function authenticate(password, userData = null) {
       throw new Error('Supabase not configured');
     }
     
-    // Use email from userData if provided, otherwise use a default or stored email
-    const email = userData?.email || localStorage.getItem('lastEmail') || 'default@example.com';
+    // Require email explicitly from userData
+    const email = userData?.email;
+    
+    if (!email) {
+      throw new Error('Email is required for authentication');
+    }
+    
+    console.log('Attempting login with email:', email);
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
