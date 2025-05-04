@@ -72,7 +72,7 @@ export async function sendRequest(data, endpoint = '/webhook') {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        credentials: 'include',
+        // Removed credentials to make it compatible with CORS proxy
         signal: controller.signal
       });
       
