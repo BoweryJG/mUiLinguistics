@@ -170,13 +170,13 @@ export async function uploadFile(file, filePath, progressCallback = null) {
     // Create a bucket if it doesn't exist (only needed first time)
     const { data: bucketData, error: bucketError } = await supabase
       .storage
-      .getBucket('audio-files');
+      .getBucket('audiorecordings');
       
     if (bucketError && bucketError.code === 'PGRST116') {
       // Bucket doesn't exist, create it
       const { error: createError } = await supabase
         .storage
-        .createBucket('audio-files', {
+        .createBucket('audiorecordings', {
           public: true,
           fileSizeLimit: 52428800 // 50MB in bytes
         });
@@ -190,7 +190,7 @@ export async function uploadFile(file, filePath, progressCallback = null) {
     // Upload the file
     const { data, error } = await supabase
       .storage
-      .from('audio-files')
+      .from('audiorecordings')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
@@ -209,7 +209,7 @@ export async function uploadFile(file, filePath, progressCallback = null) {
     // Get the public URL
     const { data: { publicUrl } } = supabase
       .storage
-      .from('audio-files')
+      .from('audiorecordings')
       .getPublicUrl(filePath);
       
     return { data: { ...data, publicUrl } };
