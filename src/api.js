@@ -124,20 +124,20 @@ export async function logActivity(activity) {
   }
   
   try {
-    // Check if the activity_log table exists
+    // Check if the activity_log table exists and has the expected columns
     const { error: checkError } = await supabase
       .from('activity_log')
-      .select('id')
+      .select('action')
       .limit(1)
       .single();
     
-    // If the table doesn't exist, log a warning and return null
-    if (checkError && checkError.code === 'PGRST116') {
-      console.warn('activity_log table does not exist in Supabase. Activity logging skipped.');
+    // If the table doesn't exist or column is missing, log a warning and return null
+    if (checkError && (checkError.code === 'PGRST116' || checkError.message.includes('column'))) {
+      console.warn('activity_log table does not have the expected structure in Supabase. Activity logging skipped.', checkError);
       return null;
     }
     
-    // If the table exists, insert the activity
+    // If the table exists with the column, insert the activity
     const { data, error } = await supabase
       .from('activity_log')
       .insert([activity]);
@@ -274,6 +274,7 @@ export async function authenticate(password, userData = null) {
     }
     
     console.log('Attempting login with email:', email);
+    console.log('User data provided:', JSON.stringify(userData, null, 2));
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
