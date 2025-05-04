@@ -68,11 +68,14 @@ export async function sendRequest(data, endpoint = '/webhook') {
   console.log('Sending payload:', payload);
     
     try {
+      // Get auth headers asynchronously
+      const headers = await getAuthHeaders();
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          ...getAuthHeaders() // Add authorization headers
+          ...headers // Add authorization headers
         },
         body: JSON.stringify(payload),
         // Removed credentials to make it compatible with CORS proxy
@@ -143,21 +146,26 @@ export async function logActivity(activity) {
 }
 
 /**
- * Get user token from localStorage
- * @returns {string|null} The JWT token
+ * Get user token from Supabase session
+ * @returns {Promise<string|null>} The JWT token
  */
-export function getUserToken() {
+export async function getUserToken() {
   if (!supabase) return null;
-  const session = supabase.auth.session();
-  return session?.access_token || null;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('Error getting user token:', error);
+    return null;
+  }
 }
 
 /**
  * Include authorization header in API requests
- * @returns {Object} Headers object with Authorization
+ * @returns {Promise<Object>} Headers object with Authorization
  */
-export function getAuthHeaders() {
-  const token = getUserToken();
+export async function getAuthHeaders() {
+  const token = await getUserToken();
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
@@ -174,9 +182,12 @@ export async function getUserUsage() {
     const targetUrl = `${baseUrl}/user/usage`;
     const url = `${corsProxyUrl}${encodeURIComponent(targetUrl)}`;
     
+    // Get auth headers asynchronously
+    const headers = await getAuthHeaders();
+    
     const response = await fetch(url, {
       headers: {
-        ...getAuthHeaders(),
+        ...headers,
         'Content-Type': 'application/json'
       }
     });
@@ -233,8 +244,8 @@ export async function authenticate(password, userData = null) {
     // For demo purposes, accept any password as valid
     const mockUser = userData || {
       id: 'demo-user-123',
-      name: 'Demo User',
-      email: 'demo@example.com'
+      name: 'Jason G',
+      email: 'jason@example.com'
     };
     
     return { 
