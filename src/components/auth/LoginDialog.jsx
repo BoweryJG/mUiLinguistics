@@ -38,7 +38,16 @@ const LoginDialog = ({ open, onClose }) => {
   };
   
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      ModalProps={{
+        container: () => document.getElementById('modal-root'),
+        disablePortal: true
+      }}
+    >
       <DialogTitle>Log In</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
