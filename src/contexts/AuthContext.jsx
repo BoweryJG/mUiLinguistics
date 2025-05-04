@@ -50,7 +50,24 @@ export const AuthProvider = ({ children }) => {
   // Fetch user's usage data
   const fetchUsageData = async () => {
     try {
-      const data = await api.getUserUsage();
+      // Try to get usage data from the API
+      let data;
+      
+      try {
+        // First try with CORS proxy
+        data = await api.getUserUsage();
+      } catch (proxyError) {
+        console.log('Failed to fetch usage with CORS proxy, trying direct method');
+        try {
+          // If CORS proxy fails, try direct method
+          data = await api.getUserUsageDirectly();
+        } catch (directError) {
+          console.log('Failed to fetch usage directly, using mock data');
+          // If both methods fail, use mock data
+          data = await api.getMockUserUsage();
+        }
+      }
+      
       setUsageData(data);
       setSubscription({
         tier: data.tier,
@@ -59,7 +76,7 @@ export const AuthProvider = ({ children }) => {
         resetDate: data.reset_date
       });
     } catch (error) {
-      console.error('Failed to fetch usage data:', error);
+      console.error('All methods to fetch usage data failed:', error);
       // Set default values if we can't fetch from the server
       setSubscription({
         tier: 'free',

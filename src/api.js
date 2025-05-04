@@ -716,6 +716,46 @@ export async function getUserConversations(limit = 10, offset = 0) {
   }
 }
 
+// Mock implementation of getUserUsage for when the backend is not available
+export async function getMockUserUsage() {
+  console.log('Using mock usage data - backend endpoint not available');
+  return {
+    tier: 'free',
+    usage: 0,
+    quota: 10,
+    reset_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
+  };
+}
+
+// Direct API call without CORS proxy - alternative method if CORS proxy fails
+export async function getUserUsageDirectly() {
+  try {
+    const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+    const targetUrl = `${baseUrl}/user/usage`;
+    
+    // Get auth headers asynchronously
+    const headers = await getAuthHeaders();
+    
+    const response = await fetch(targetUrl, {
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error getting usage: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching usage directly:', error);
+    return getMockUserUsage();
+  }
+}
+
 export default {
   sendRequest,
   logActivity,
@@ -729,5 +769,8 @@ export default {
   storeParticipant,
   getConversationWithAnalysis,
   getUserConversations,
+  getUserUsage,
+  getUserUsageDirectly,
+  getMockUserUsage,
   supabase
 };
