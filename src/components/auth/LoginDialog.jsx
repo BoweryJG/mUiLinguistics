@@ -53,6 +53,7 @@ const LoginDialog = ({ open, onClose }) => {
         <DialogContent>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <TextField
+            autoFocus
             label="Email"
             type="email"
             fullWidth
