@@ -9,6 +9,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState(null);
   const [usageData, setUsageData] = useState(null);
+  const [session, setSession] = useState(null);
+  const [error, setError] = useState(null);
   
   // Check auth status on initial render
   useEffect(() => {
@@ -89,13 +91,19 @@ export const AuthProvider = ({ children }) => {
   
   const login = async (credentials) => {
     try {
-      const { user } = await api.authenticate(credentials.password, null);
-      setIsAuthenticated(true);
-      setUser(user);
-      fetchUsageData();
-      return { success: true };
+      setLoading(true);
+      const userData = { email: credentials.email };
+      const data = await api.authenticate(credentials.password, userData);
+      setUser(data.user);
+      setSession(data.session);
+      localStorage.setItem('lastEmail', credentials.email);
+      return data;
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Login error:', error);
+      setError(error.message || 'An error occurred during login');
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -133,6 +141,8 @@ export const AuthProvider = ({ children }) => {
       loading,
       subscription,
       usageData,
+      session,
+      error,
       fetchUsageData,
       login,
       signup,
