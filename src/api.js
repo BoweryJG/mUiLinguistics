@@ -33,13 +33,26 @@ export async function sendRequest(data, endpoint = '/webhook') {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
-  // Format the payload according to the backend's expected format
-  // Send the complete data object as is, without modifying it
-  const payload = data;
-  
-  // Log the payload for debugging
-  
-  console.log('Sending payload:', payload);
+    // Format the payload according to the AudioRequest model in backend_implementation.py
+    // The backend expects a payload with a "filename" field
+    let formattedPayload;
+    
+    if (endpoint === '/webhook') {
+      // Extract the filename from the data object
+      let filename = '';
+      if (data.data?.fileUrl) {
+        filename = data.data.fileUrl;
+      } else if (data.fileUrl) {
+        filename = data.fileUrl;
+      }
+      
+      formattedPayload = { filename };
+    } else {
+      // For other endpoints, use the data as is
+      formattedPayload = data;
+    }
+    
+    console.log('Sending formatted payload:', formattedPayload);
     
     try {
       // Get auth headers asynchronously
@@ -49,12 +62,10 @@ export async function sendRequest(data, endpoint = '/webhook') {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
           ...headers // Add authorization headers
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formattedPayload),
         mode: 'cors',
-        credentials: 'include',
         signal: controller.signal
       });
       
@@ -142,7 +153,15 @@ export async function getUserToken() {
  */
 export async function getAuthHeaders() {
   const token = await getUserToken();
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+  
+  // For debugging
+  console.log('Auth token:', token ? 'Token available' : 'No token');
+  
+  // If no token is available, use a default token for testing
+  // This is a temporary solution until proper auth is implemented
+  const defaultToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItaWQiLCJuYW1lIjoiVGVzdCBVc2VyIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+  
+  return { 'Authorization': `Bearer ${token || defaultToken}` };
 }
 
 /**
@@ -152,20 +171,20 @@ export async function getAuthHeaders() {
 export async function getUserUsage() {
   try {
     const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+    const url = `${baseUrl}/user/usage`;
     
-    // Use CORS proxy to bypass CORS restrictions
-    const corsProxyUrl = 'https://corsproxy.io/?';
-    const targetUrl = `${baseUrl}/user/usage`;
-    const url = `${corsProxyUrl}${encodeURIComponent(targetUrl)}`;
+    console.log(`Getting usage data from: ${url}`);
     
     // Get auth headers asynchronously
     const headers = await getAuthHeaders();
     
     const response = await fetch(url, {
+      method: 'GET',
       headers: {
         ...headers,
         'Content-Type': 'application/json'
-      }
+      },
+      mode: 'cors'
     });
     
     if (!response.ok) {
