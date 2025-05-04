@@ -6,10 +6,14 @@ import {
   Box,
   Container,
   Avatar,
-  useTheme,
-  ThemeProvider,
-  CssBaseline
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Divider
 } from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 // Import API service
 import api from './api';
@@ -19,6 +23,12 @@ import DashboardView from './components/DashboardView';
 import AnalysisView from './components/AnalysisView';
 import CompleteView from './components/CompleteView';
 import InsightsView from './components/InsightsView';
+import LoginDialog from './components/auth/LoginDialog';
+import SignupDialog from './components/auth/SignupDialog';
+
+// Import contexts
+import { useTheme } from './contexts/ThemeContext';
+import { useAuth } from './contexts/AuthContext';
 
 // Main App Component
 const App = () => {
@@ -327,14 +337,51 @@ const App = () => {
     setUploadState('upload');
   };
 
+  // New state for auth dialogs and user menu
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
+  
+  // Get theme and auth from contexts
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { isAuthenticated, user, logout, getInitials } = useAuth();
+  
+  // User menu handlers
+  const handleUserMenuOpen = (event) => {
+    setUserMenuAnchorEl(event.currentTarget);
+  };
+  
+  const handleUserMenuClose = () => {
+    setUserMenuAnchorEl(null);
+  };
+  
+  const handleLogout = async () => {
+    await logout();
+    handleUserMenuClose();
+  };
+  
+  // Dialog handlers
+  const handleLoginOpen = () => setLoginOpen(true);
+  const handleLoginClose = () => setLoginOpen(false);
+  const handleSignupOpen = () => setSignupOpen(true);
+  const handleSignupClose = () => setSignupOpen(false);
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh',
+      bgcolor: 'background.default',
+      color: 'text.primary'
+    }}>
       {/* Navigation Bar */}
-      <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white' }}>
+      <AppBar position="static" color="default" elevation={0} sx={{ bgcolor: 'background.paper' }}>
         <Toolbar>
           <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mr: 4 }}>
             RepSpheres
           </Typography>
+          
+          {/* Navigation items */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box 
               onClick={() => handleViewChange('dashboard')} 
@@ -347,7 +394,7 @@ const App = () => {
                 fontSize: '0.875rem', 
                 cursor: 'pointer', 
                 color: currentView === 'dashboard' ? 'primary.main' : 'text.secondary',
-                bgcolor: currentView === 'dashboard' ? '#ede9fe' : 'transparent',
+                bgcolor: currentView === 'dashboard' ? (isDarkMode ? 'rgba(138, 43, 226, 0.1)' : '#ede9fe') : 'transparent',
                 '&:hover': { color: currentView === 'dashboard' ? 'primary.main' : 'text.primary' }
               }}
             >
@@ -364,7 +411,7 @@ const App = () => {
                 fontSize: '0.875rem', 
                 cursor: 'pointer', 
                 color: currentView === 'analyze' ? 'primary.main' : 'text.secondary',
-                bgcolor: currentView === 'analyze' ? '#ede9fe' : 'transparent',
+                bgcolor: currentView === 'analyze' ? (isDarkMode ? 'rgba(138, 43, 226, 0.1)' : '#ede9fe') : 'transparent',
                 '&:hover': { color: currentView === 'analyze' ? 'primary.main' : 'text.primary' }
               }}
             >
@@ -381,17 +428,85 @@ const App = () => {
                 fontSize: '0.875rem', 
                 cursor: 'pointer', 
                 color: currentView === 'insights' ? 'primary.main' : 'text.secondary',
-                bgcolor: currentView === 'insights' ? '#ede9fe' : 'transparent',
+                bgcolor: currentView === 'insights' ? (isDarkMode ? 'rgba(138, 43, 226, 0.1)' : '#ede9fe') : 'transparent',
                 '&:hover': { color: currentView === 'insights' ? 'primary.main' : 'text.primary' }
               }}
             >
               Team Insights
             </Box>
           </Box>
-          <Box sx={{ marginLeft: 'auto' }}>
-            <Avatar sx={{ bgcolor: '#ede9fe', color: 'primary.main', width: '2rem', height: '2rem', fontWeight: 500 }}>
-              JS
-            </Avatar>
+          
+          {/* Theme toggle and auth */}
+          <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Theme toggle */}
+            <IconButton onClick={toggleTheme} color="inherit" sx={{ 
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'rotate(30deg)',
+                color: 'primary.main'
+              }
+            }}>
+              {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+            
+            {/* Auth section */}
+            {isAuthenticated ? (
+              // Logged in - show avatar
+              <Avatar 
+                onClick={handleUserMenuOpen}
+                sx={{ 
+                  bgcolor: isDarkMode ? 'primary.main' : '#ede9fe', 
+                  color: isDarkMode ? 'white' : 'primary.main', 
+                  width: '2rem', 
+                  height: '2rem', 
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    transform: 'scale(1.1)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                  }
+                }}
+              >
+                {getInitials(user?.name)}
+              </Avatar>
+            ) : (
+              // Not logged in - show buttons
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button 
+                  variant="outlined" 
+                  size="small"
+                  onClick={handleLoginOpen}
+                  sx={{
+                    borderRadius: '20px',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                    }
+                  }}
+                >
+                  Log In
+                </Button>
+                <Button 
+                  variant="contained" 
+                  size="small"
+                  onClick={handleSignupOpen}
+                  sx={{
+                    borderRadius: '20px',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                    }
+                  }}
+                >
+                  Sign Up
+                </Button>
+              </Box>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
@@ -427,6 +542,22 @@ const App = () => {
           <InsightsView />
         )}
       </Container>
+      
+      {/* User menu */}
+      <Menu
+        anchorEl={userMenuAnchorEl}
+        open={Boolean(userMenuAnchorEl)}
+        onClose={handleUserMenuClose}
+      >
+        <MenuItem onClick={handleUserMenuClose}>Profile</MenuItem>
+        <MenuItem onClick={handleUserMenuClose}>Settings</MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </Menu>
+      
+      {/* Auth dialogs */}
+      <LoginDialog open={loginOpen} onClose={handleLoginClose} />
+      <SignupDialog open={signupOpen} onClose={handleSignupClose} />
     </Box>
   );
 };
