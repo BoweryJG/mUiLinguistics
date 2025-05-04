@@ -262,39 +262,30 @@ export async function checkAuthStatus() {
  */
 export async function authenticate(password, userData = null) {
   try {
-    // Return a mock response without making an API call
-    // This prevents "failed to fetch" errors when the endpoint doesn't exist
-    console.log('Authentication bypassed - endpoint not available');
+    if (!supabase) {
+      throw new Error('Supabase not configured');
+    }
     
-    // For demo purposes, accept any password as valid
-    const mockUser = userData || {
-      id: 'demo-user-123',
-      name: 'Jason G',
-      email: 'jason@example.com'
-    };
+    // Use email from userData if provided, otherwise use a default or stored email
+    const email = userData?.email || localStorage.getItem('lastEmail') || 'default@example.com';
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) {
+      console.error('Supabase authentication error:', error);
+      throw new Error(`Authentication failed: ${error.message}`);
+    }
+    
+    // Store email for future logins if needed
+    localStorage.setItem('lastEmail', email);
     
     return { 
       success: true,
-      user: mockUser
+      user: data.user
     };
-    
-    // Original implementation - commented out to prevent fetch errors
-    /*
-    const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
-    const response = await fetch(`${baseUrl}/auth/password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, userData }),
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Authentication failed: ${response.status}`);
-    }
-    
-    return await response.json();
-    */
   } catch (err) {
     console.error('Authentication error:', err);
     throw err;
@@ -308,39 +299,38 @@ export async function authenticate(password, userData = null) {
  */
 export async function register(userData) {
   try {
-    // Return a mock response without making an API call
-    // This prevents "failed to fetch" errors when the endpoint doesn't exist
-    console.log('Registration bypassed - endpoint not available');
+    if (!supabase) {
+      throw new Error('Supabase not configured');
+    }
     
-    // Create a mock user based on the provided userData
-    const mockUser = {
-      id: 'demo-user-' + Date.now(),
-      name: userData.name || 'New User',
-      email: userData.email || 'user@example.com'
-    };
+    const { email, password, name } = userData;
+    
+    if (!email || !password) {
+      throw new Error('Email and password are required for registration');
+    }
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name
+        }
+      }
+    });
+    
+    if (error) {
+      console.error('Supabase registration error:', error);
+      throw new Error(`Registration failed: ${error.message}`);
+    }
+    
+    // Store email for future logins
+    localStorage.setItem('lastEmail', email);
     
     return { 
       success: true,
-      user: mockUser
+      user: data.user
     };
-    
-    // Original implementation - commented out to prevent fetch errors
-    /*
-    const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
-    const response = await fetch(`${baseUrl}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Registration failed: ${response.status}`);
-    }
-    
-    return await response.json();
-    */
   } catch (err) {
     console.error('Registration error:', err);
     throw err;
