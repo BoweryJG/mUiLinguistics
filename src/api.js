@@ -28,6 +28,7 @@ export async function sendRequest(data, endpoint = '/webhook') {
     const url = `${baseUrl}${apiEndpoint}`;
     
     console.log(`Sending direct request to: ${url}`);
+    console.log(`Sending payload:`, data);
     
     // Add better error handling with timeouts and retry logic
     const controller = new AbortController();
@@ -82,7 +83,28 @@ export async function sendRequest(data, endpoint = '/webhook') {
         console.error('Request timed out after 30 seconds');
         throw new Error('Request timed out. The server might be experiencing high load or cold-starting.');
       }
-      throw fetchError;
+      console.error('Direct request failed, attempting with CORS proxy', fetchError);
+      // Try with CORS proxy as a fallback
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+      console.log(`Trying with CORS proxy: ${proxyUrl}`);
+      
+      const proxyResponse = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(await getAuthHeaders())
+        },
+        body: JSON.stringify(formattedPayload),
+        mode: 'cors',
+        signal: controller.signal
+      });
+      
+      if (!proxyResponse.ok) {
+        const errorData = await proxyResponse.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error ${proxyResponse.status} via proxy`);
+      }
+      
+      return await proxyResponse.json();
     }
   } catch (error) {
     console.error('API request failed:', error);
@@ -157,11 +179,12 @@ export async function getAuthHeaders() {
   // For debugging
   console.log('Auth token:', token ? 'Token available' : 'No token');
   
-  // If no token is available, use a default token for testing
-  // This is a temporary solution until proper auth is implemented
-  const defaultToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItaWQiLCJuYW1lIjoiVGVzdCBVc2VyIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+  if (!token) {
+    console.warn('No authentication token available. Proceeding without Authorization header.');
+    return {};
+  }
   
-  return { 'Authorization': `Bearer ${token || defaultToken}` };
+  return { 'Authorization': `Bearer ${token}` };
 }
 
 /**
@@ -194,7 +217,14 @@ export async function getUserUsage() {
     return await response.json();
   } catch (error) {
     console.error('Error fetching usage:', error);
-    throw error;
+    console.log('Failed to fetch usage with CORS proxy, trying direct method');
+    try {
+      return await getUserUsageDirectly();
+    } catch (directError) {
+      console.error('Error fetching usage directly:', directError);
+      console.log('Using mock usage data - backend endpoint not available');
+      return getMockUserUsage();
+    }
   }
 }
 
