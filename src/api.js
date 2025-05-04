@@ -236,27 +236,67 @@ export async function uploadFile(file, filePath, progressCallback = null) {
   }
   
   try {
-    // Create a bucket if it doesn't exist (only needed first time)
-    const { data: bucketData, error: bucketError } = await supabase
-      .storage
-      .getBucket('audiorecordings');
-      
-    if (bucketError && bucketError.code === 'PGRST116') {
-      // Bucket doesn't exist, create it
-      const { error: createError } = await supabase
+    console.log('Starting file upload to Supabase...');
+    
+    // First check if the bucket exists
+    console.log('Checking if bucket exists: audiorecordings');
+    try {
+      const { data: bucketData, error: bucketError } = await supabase
         .storage
-        .createBucket('audiorecordings', {
-          public: true,
-          fileSizeLimit: 52428800 // 50MB in bytes
-        });
-        
-      if (createError) {
-        console.error('Error creating bucket:', createError);
-        return { error: createError };
+        .getBucket('audiorecordings');
+      
+      // If there's an error but it's not because the bucket doesn't exist
+      if (bucketError && bucketError.code !== 'PGRST116') {
+        console.error('Error checking bucket existence:', bucketError);
+        return { error: bucketError };
       }
+      
+      // If the bucket doesn't exist, create it
+      if (!bucketData || (bucketError && bucketError.code === 'PGRST116')) {
+        console.log('Bucket does not exist, creating it...');
+        try {
+          const { data: createData, error: createError } = await supabase
+            .storage
+            .createBucket('audiorecordings', {
+              public: true,
+              fileSizeLimit: 52428800 // 50MB in bytes
+            });
+          
+          if (createError) {
+            console.error('Error creating bucket:', createError);
+            return { error: createError };
+          }
+          
+          console.log('Bucket created successfully:', createData);
+        } catch (createErr) {
+          console.error('Exception creating bucket:', createErr);
+          return { error: createErr };
+        }
+      } else {
+        console.log('Bucket already exists:', bucketData);
+      }
+    } catch (bucketErr) {
+      console.error('Exception checking bucket:', bucketErr);
+      // Continue anyway, as this might be a temporary error
+    }
+
+    // List existing buckets to help with debugging
+    try {
+      const { data: listData, error: listError } = await supabase
+        .storage
+        .listBuckets();
+        
+      if (listError) {
+        console.error('Error listing buckets:', listError);
+      } else {
+        console.log('Available buckets:', listData.map(b => b.name));
+      }
+    } catch (listErr) {
+      console.error('Exception listing buckets:', listErr);
     }
     
     // Upload the file
+    console.log(`Uploading file to path: ${filePath}`);
     const { data, error } = await supabase
       .storage
       .from('audiorecordings')
@@ -267,6 +307,7 @@ export async function uploadFile(file, filePath, progressCallback = null) {
           (progress) => {
             const percent = Math.round((progress.loaded / progress.total) * 100);
             progressCallback(percent);
+            console.log(`Upload progress: ${percent}%`);
           } : undefined
       });
       
@@ -275,12 +316,17 @@ export async function uploadFile(file, filePath, progressCallback = null) {
       return { error };
     }
     
+    console.log('File uploaded successfully:', data);
+    
     // Get the public URL
+    console.log('Getting public URL for uploaded file');
     const { data: { publicUrl } } = supabase
       .storage
       .from('audiorecordings')
       .getPublicUrl(filePath);
       
+    console.log('Public URL:', publicUrl);
+    
     return { data: { ...data, publicUrl } };
   } catch (err) {
     console.error('Exception uploading file:', err);
