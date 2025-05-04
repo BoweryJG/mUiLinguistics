@@ -174,17 +174,33 @@ export async function getUserToken() {
  * @returns {Promise<Object>} Headers object with Authorization
  */
 export async function getAuthHeaders() {
-  const token = await getUserToken();
+  const headers = {
+    'Content-Type': 'application/json',
+  };
   
-  // For debugging
-  console.log('Auth token:', token ? 'Token available' : 'No token');
-  
-  if (!token) {
-    console.warn('No authentication token available. Proceeding without Authorization header.');
-    return {};
+  // Check for token in localStorage first
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    console.log('Using token from localStorage');
+    headers['Authorization'] = `Bearer ${token}`;
+    return headers;
   }
   
-  return { 'Authorization': `Bearer ${token}` };
+  // If no token in localStorage, try to get from Supabase session
+  try {
+    const sessionToken = await getUserToken();
+    if (sessionToken) {
+      console.log('Using token from Supabase session');
+      headers['Authorization'] = `Bearer ${sessionToken}`;
+    } else {
+      console.log('No authentication token available. Proceeding without Authorization header.');
+    }
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    console.log('Proceeding without Authorization header due to error.');
+  }
+  
+  return headers;
 }
 
 /**
@@ -291,7 +307,8 @@ export async function authenticate(password, userData = null) {
     
     return { 
       success: true,
-      user: data.user
+      user: data.user,
+      session: data.session
     };
   } catch (err) {
     console.error('Authentication error:', err);

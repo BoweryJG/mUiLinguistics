@@ -97,6 +97,10 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       setSession(data.session);
       localStorage.setItem('lastEmail', credentials.email);
+      // Store the token for API calls
+      if (data.session) {
+        localStorage.setItem('authToken', data.session.access_token);
+      }
       return data;
     } catch (error) {
       console.error('Login error:', error);
