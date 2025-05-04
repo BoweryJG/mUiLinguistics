@@ -141,6 +141,9 @@ const App = () => {
           fileUrl: data?.publicUrl || '',
           conversationId: conversationId
         }
+      }).catch(error => {
+        console.error('Error calling API:', error);
+        throw new Error('Failed to process audio file. Please try again.');
       });
       
       // Log activity to Supabase

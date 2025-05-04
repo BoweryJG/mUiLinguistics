@@ -21,9 +21,24 @@ export const AuthProvider = ({ children }) => {
         if (authenticated && user) {
           // Fetch subscription data
           fetchUsageData();
+        } else {
+          // Set default values if not authenticated
+          setSubscription({
+            tier: 'free',
+            quota: 10,
+            usage: 0,
+            resetDate: null
+          });
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        // Set default values on error
+        setSubscription({
+          tier: 'free',
+          quota: 10,
+          usage: 0,
+          resetDate: null
+        });
       } finally {
         setLoading(false);
       }
