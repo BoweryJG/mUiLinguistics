@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Typography,
   Box,
@@ -28,6 +28,18 @@ import {
 import { ScoreBadge, IconWrapper, Badge, ProgressBar } from './StyledComponents';
 
 const DashboardView = ({ onUploadClick }) => {
+  // State to track which sections are expanded
+  const [expandedSection, setExpandedSection] = useState(null);
+  
+  // Function to toggle section expansion
+  const toggleSection = (sectionName) => {
+    if (expandedSection === sectionName) {
+      setExpandedSection(null);
+    } else {
+      setExpandedSection(sectionName);
+    }
+  };
+  
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={8}>
@@ -191,7 +203,32 @@ const DashboardView = ({ onUploadClick }) => {
           <CardContent>
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                <Paper 
+                  onClick={() => toggleSection('psychology')}
+                  sx={{ 
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#f8fafc', 
+                    borderRadius: 2, 
+                    p: 2.5,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease-in-out',
+                    position: 'relative',
+                    overflow: 'visible',
+                    height: expandedSection === 'psychology' ? 'auto' : undefined,
+                    minHeight: expandedSection === 'psychology' ? '400px' : undefined,
+                    boxShadow: expandedSection === 'psychology' ? 
+                      (theme) => theme.palette.mode === 'dark' ? '0 0 15px rgba(138, 43, 226, 0.3)' : '0 4px 20px rgba(0,0,0,0.1)' 
+                      : 'none',
+                    border: (theme) => expandedSection === 'psychology' ? 
+                      `1px solid ${theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.light}` 
+                      : '1px solid #e2e8f0',
+                    '&:hover': { 
+                      transform: 'translateY(-4px)',
+                      boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 0 15px rgba(138, 43, 226, 0.3)' : '0 4px 20px rgba(0,0,0,0.1)',
+                      borderColor: (theme) => theme.palette.primary.main
+                    },
+                    zIndex: expandedSection === 'psychology' ? 10 : 1
+                  }}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                     <IconWrapper color="secondary">
                       <Psychology />
@@ -232,11 +269,95 @@ const DashboardView = ({ onUploadClick }) => {
                     </Box>
                     <ProgressBar value={18} color="secondary" />
                   </Box>
+                  
+                  {/* Expanded content */}
+                  {expandedSection === 'psychology' && (
+                    <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed #cbd5e1' }}>
+                      <Typography variant="h4" sx={{ mb: 2 }}>Detailed Psychology Analysis</Typography>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>Analytical Prospects (42%)</Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Focus on data and logical arguments
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Respond well to detailed ROI calculations
+                        </Typography>
+                        <Typography variant="body2">
+                          • Prefer comprehensive documentation
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>Collaborative Prospects (28%)</Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Value team consensus and input
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Respond to inclusive language
+                        </Typography>
+                        <Typography variant="body2">
+                          • Appreciate discussion of implementation process
+                        </Typography>
+                      </Box>
+                      
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>Decisive Prospects (18%)</Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Quick to make judgments
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Prefer direct, concise communication
+                        </Typography>
+                        <Typography variant="body2">
+                          • Respond to clear action items
+                        </Typography>
+                      </Box>
+                      
+                      <Button 
+                        variant="outlined" 
+                        color="secondary" 
+                        size="small" 
+                        sx={{ mt: 3 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open('/psychology-report', '_blank');
+                        }}
+                      >
+                        View Full Psychology Report
+                      </Button>
+                    </Box>
+                  )}
                 </Paper>
               </Grid>
               
               <Grid item xs={12} md={4}>
-                <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                <Paper 
+                  onClick={() => toggleSection('persuasion')}
+                  sx={{ 
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#f8fafc', 
+                    borderRadius: 2, 
+                    p: 2.5,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease-in-out',
+                    position: 'relative',
+                    overflow: 'visible',
+                    height: expandedSection === 'persuasion' ? 'auto' : undefined,
+                    minHeight: expandedSection === 'persuasion' ? '400px' : undefined,
+                    boxShadow: expandedSection === 'persuasion' ? 
+                      (theme) => theme.palette.mode === 'dark' ? '0 0 15px rgba(0, 255, 255, 0.3)' : '0 4px 20px rgba(0,0,0,0.1)' 
+                      : 'none',
+                    border: (theme) => expandedSection === 'persuasion' ? 
+                      `1px solid ${theme.palette.mode === 'dark' ? theme.palette.info.main : theme.palette.info.light}` 
+                      : '1px solid #e2e8f0',
+                    '&:hover': { 
+                      transform: 'translateY(-4px)',
+                      boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 0 15px rgba(0, 255, 255, 0.3)' : '0 4px 20px rgba(0,0,0,0.1)',
+                      borderColor: (theme) => theme.palette.info.main
+                    },
+                    zIndex: expandedSection === 'persuasion' ? 10 : 1
+                  }}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                     <IconWrapper color="info">
                       <Bolt />
@@ -268,11 +389,95 @@ const DashboardView = ({ onUploadClick }) => {
                       Technical demonstrations
                     </Typography>
                   </Box>
+                  
+                  {/* Expanded content */}
+                  {expandedSection === 'persuasion' && (
+                    <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed #cbd5e1' }}>
+                      <Typography variant="h4" sx={{ mb: 2 }}>Persuasion Effectiveness</Typography>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>Social Proof Examples</Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • 87% success rate with enterprise clients
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Most effective when citing similar companies
+                        </Typography>
+                        <Typography variant="body2">
+                          • Increases close rate by 34% when used early
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>ROI-Focused Discussion</Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Particularly effective with financial decision makers
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Concrete examples outperform theoretical benefits
+                        </Typography>
+                        <Typography variant="body2">
+                          • Most impactful when customized to prospect's industry
+                        </Typography>
+                      </Box>
+                      
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>Technical Demonstrations</Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Most effective with technical stakeholders
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Interactive demos have 2.5x engagement
+                        </Typography>
+                        <Typography variant="body2">
+                          • Should be tailored to specific use cases
+                        </Typography>
+                      </Box>
+                      
+                      <Button 
+                        variant="outlined" 
+                        color="info" 
+                        size="small" 
+                        sx={{ mt: 3 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open('/persuasion-analysis', '_blank');
+                        }}
+                      >
+                        View Detailed Persuasion Analysis
+                      </Button>
+                    </Box>
+                  )}
                 </Paper>
               </Grid>
               
               <Grid item xs={12} md={4}>
-                <Paper sx={{ bgcolor: '#f8fafc', borderRadius: 2, p: 2.5 }}>
+                <Paper 
+                  onClick={() => toggleSection('strategic')}
+                  sx={{ 
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'background.paper' : '#f8fafc', 
+                    borderRadius: 2, 
+                    p: 2.5,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease-in-out',
+                    position: 'relative',
+                    overflow: 'visible',
+                    height: expandedSection === 'strategic' ? 'auto' : undefined,
+                    minHeight: expandedSection === 'strategic' ? '400px' : undefined,
+                    boxShadow: expandedSection === 'strategic' ? 
+                      (theme) => theme.palette.mode === 'dark' ? '0 0 15px rgba(0, 250, 154, 0.3)' : '0 4px 20px rgba(0,0,0,0.1)' 
+                      : 'none',
+                    border: (theme) => expandedSection === 'strategic' ? 
+                      `1px solid ${theme.palette.mode === 'dark' ? theme.palette.success.main : theme.palette.success.light}` 
+                      : '1px solid #e2e8f0',
+                    '&:hover': { 
+                      transform: 'translateY(-4px)',
+                      boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 0 15px rgba(0, 250, 154, 0.3)' : '0 4px 20px rgba(0,0,0,0.1)',
+                      borderColor: (theme) => theme.palette.success.main
+                    },
+                    zIndex: expandedSection === 'strategic' ? 10 : 1
+                  }}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                     <IconWrapper color="success">
                       <TrackChanges />
@@ -304,6 +509,71 @@ const DashboardView = ({ onUploadClick }) => {
                     </Typography>
                     <Badge variant="success">Strong</Badge>
                   </Box>
+                  
+                  {/* Expanded content */}
+                  {expandedSection === 'strategic' && (
+                    <Box sx={{ mt: 3, pt: 3, borderTop: '1px dashed #cbd5e1' }}>
+                      <Typography variant="h4" sx={{ mb: 2 }}>Improvement Opportunities</Typography>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1, color: (theme) => theme.palette.warning.main }}>
+                          Value Articulation (Needs Focus)
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Only 32% of calls effectively communicate unique value
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Reps struggle to tailor value to specific industries
+                        </Typography>
+                        <Typography variant="body2">
+                          • Recommended training: Value Proposition Workshop
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1, color: (theme) => theme.palette.info.main }}>
+                          Objection Handling (Improving)
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • 58% improvement in addressing pricing concerns
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Still struggling with competitive differentiation
+                        </Typography>
+                        <Typography variant="body2">
+                          • Continue role-playing exercises in team meetings
+                        </Typography>
+                      </Box>
+                      
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, mb: 1, color: (theme) => theme.palette.success.main }}>
+                          Active Listening (Strong)
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • 87% of reps demonstrate excellent listening skills
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          • Effective use of clarifying questions
+                        </Typography>
+                        <Typography variant="body2">
+                          • Consider having top performers mentor new hires
+                        </Typography>
+                      </Box>
+                      
+                      <Button 
+                        variant="outlined" 
+                        color="success" 
+                        size="small" 
+                        sx={{ mt: 3 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open('/improvement-plan', '_blank');
+                        }}
+                      >
+                        View Complete Improvement Plan
+                      </Button>
+                    </Box>
+                  )}
                 </Paper>
               </Grid>
             </Grid>
