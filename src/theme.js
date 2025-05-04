@@ -188,6 +188,7 @@ export const darkTheme = createTheme({
     },
     body2: {
       fontSize: '0.875rem',
+      color: '#B0C4DE', // Light steel blue for better visibility in dark mode
     },
   },
   components: {

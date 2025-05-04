@@ -224,24 +224,54 @@ const AnalysisView = ({
               <Box sx={{ maxWidth: '32rem', mx: 'auto' }}>
                 <Box sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="body2">Transcribing audio</Typography>
-                    <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>Complete</Typography>
+                    <Typography variant="body2" sx={{ color: (theme) => theme.palette.mode === 'dark' ? '#FFFFFF' : 'inherit' }}>
+                      Transcribing audio
+                    </Typography>
+                    <Typography variant="body2" sx={{ 
+                      color: 'primary.main', 
+                      fontWeight: 500,
+                      bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(138, 43, 226, 0.1)' : 'transparent',
+                      px: 1,
+                      borderRadius: 1
+                    }}>
+                      Complete
+                    </Typography>
                   </Box>
                   <ProgressBar value={100} />
                 </Box>
                 
                 <Box sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="body2">Analyzing content</Typography>
-                    <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>75%</Typography>
+                    <Typography variant="body2" sx={{ color: (theme) => theme.palette.mode === 'dark' ? '#FFFFFF' : 'inherit' }}>
+                      Analyzing content
+                    </Typography>
+                    <Typography variant="body2" sx={{ 
+                      color: 'primary.main', 
+                      fontWeight: 500,
+                      bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(138, 43, 226, 0.1)' : 'transparent',
+                      px: 1,
+                      borderRadius: 1
+                    }}>
+                      75%
+                    </Typography>
                   </Box>
                   <ProgressBar value={75} />
                 </Box>
                 
                 <Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="body2">Generating insights</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>Waiting</Typography>
+                    <Typography variant="body2" sx={{ color: (theme) => theme.palette.mode === 'dark' ? '#FFFFFF' : 'inherit' }}>
+                      Generating insights
+                    </Typography>
+                    <Typography variant="body2" sx={{ 
+                      fontWeight: 500,
+                      color: (theme) => theme.palette.mode === 'dark' ? '#B0C4DE' : 'inherit',
+                      bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(176, 196, 222, 0.1)' : 'transparent',
+                      px: 1,
+                      borderRadius: 1
+                    }}>
+                      Waiting
+                    </Typography>
                   </Box>
                   <ProgressBar value={0} color="grey" />
                 </Box>
